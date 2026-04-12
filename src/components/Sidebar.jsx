@@ -23,7 +23,7 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
             <div className={`vps-dot connected`} />
             <div style={{ overflow: 'hidden', flex: 1 }}>
               <div className="vps-name">{c.name}</div>
-              <div className="vps-host">{c.user}@{c.host}:{c.port}</div>
+              <div className="vps-host">{c.url?.replace(/^https?:\/\//, '') || 'unknown'}</div>
             </div>
             <button
               className="btn btn-ghost btn-sm"

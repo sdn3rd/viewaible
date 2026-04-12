@@ -55,7 +55,7 @@ export default function App() {
                 <span>{active.name}</span>
               </div>
               <span style={{ color: 'var(--tx3)' }}>
-                {active.host}:{active.ttydPort}
+                {active.url?.replace(/^https?:\/\//, '')}
               </span>
             </div>
           )}

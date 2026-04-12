@@ -1,35 +1,138 @@
 import { useState } from 'react';
+import { supportedDistros } from '../distros';
 
 export default function Setup({ onSave, onCancel, initial }) {
+  const [step, setStep] = useState(initial ? 'connect' : 'setup');
   const [name, setName] = useState(initial?.name || '');
-  const [host, setHost] = useState(initial?.host || '');
-  const [port, setPort] = useState(initial?.port || '22');
-  const [user, setUser] = useState(initial?.user || 'root');
-  const [ttydPort, setTtydPort] = useState(initial?.ttydPort || '7681');
-  const [ttydUser, setTtydUser] = useState(initial?.ttydUser || '');
-  const [ttydPass, setTtydPass] = useState(initial?.ttydPass || '');
+  const [url, setUrl] = useState(initial?.url || '');
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!host.trim()) return;
-    onSave({
-      name: name.trim() || host.trim(),
-      host: host.trim(),
-      port: parseInt(port) || 22,
-      user: user.trim() || 'root',
-      ttydPort: parseInt(ttydPort) || 7681,
-      ttydUser: ttydUser.trim(),
-      ttydPass: ttydPass.trim(),
-    });
+  const handleVerify = async () => {
+    let cleanUrl = url.trim();
+    if (!cleanUrl) return;
+    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+      cleanUrl = 'https://' + cleanUrl;
+    }
+
+    setChecking(true);
+    setError('');
+
+    try {
+      // Try to reach the ttyd endpoint — expect 401 (auth) or 200
+      const resp = await fetch(cleanUrl, { mode: 'no-cors' }).catch(() => null);
+      // no-cors won't give us status, but if it doesn't throw, the server is reachable
+      onSave({
+        name: name.trim() || new URL(cleanUrl).hostname,
+        url: cleanUrl,
+      });
+    } catch {
+      setError('Could not reach that URL. Make sure your VPS is set up and the domain points to it.');
+    } finally {
+      setChecking(false);
+    }
   };
+
+  if (step === 'setup') {
+    return (
+      <div className="setup-overlay">
+        <div className="setup-card" style={{ maxWidth: 560 }}>
+          <h2>Set Up Your VPS</h2>
+          <p>
+            Run this command on your VPS to install Claude Code, ttyd, and nginx.
+            Works on any supported Linux distro — auto-detected.
+          </p>
+
+          <div className="field">
+            <label>Run on your VPS</label>
+            <div style={{
+              background: 'var(--bg)',
+              border: '1px solid var(--bd)',
+              borderRadius: 6,
+              padding: '12px 14px',
+              fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+              fontSize: 12,
+              color: 'var(--gold)',
+              wordBreak: 'break-all',
+              lineHeight: 1.6,
+              cursor: 'pointer',
+              position: 'relative',
+            }}
+              onClick={() => {
+                navigator.clipboard.writeText('curl -fsSL https://paine.pages.dev/setup.sh | bash');
+              }}
+              title="Click to copy"
+            >
+              curl -fsSL https://paine.pages.dev/setup.sh | bash
+              <span style={{
+                position: 'absolute',
+                top: 8,
+                right: 10,
+                fontSize: 10,
+                color: 'var(--tx3)',
+              }}>click to copy</span>
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Supported Distros</label>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 6,
+              marginTop: 4,
+            }}>
+              {supportedDistros.map(d => (
+                <span key={d.id} style={{
+                  background: 'var(--cd2)',
+                  border: '1px solid var(--bd)',
+                  borderRadius: 4,
+                  padding: '3px 8px',
+                  fontSize: 11,
+                  color: 'var(--tx2)',
+                }}>{d.name}</span>
+              ))}
+            </div>
+            <div className="hint" style={{ marginTop: 8 }}>
+              Missing your distro? Add a YAML config — see the GitHub repo.
+            </div>
+          </div>
+
+          <div className="field" style={{ marginTop: 20 }}>
+            <label>After Setup</label>
+            <div className="hint">
+              1. Point a Cloudflare DNS record at your VPS IP<br/>
+              2. Set SSL mode to "Full" in Cloudflare<br/>
+              3. Click "I've done this" below and enter your domain
+            </div>
+          </div>
+
+          <div className="setup-actions">
+            <button
+              type="button"
+              className="btn btn-gold btn-full"
+              onClick={() => setStep('connect')}
+            >
+              I've run the setup &rarr;
+            </button>
+            {onCancel && (
+              <button type="button" className="btn btn-ghost" onClick={onCancel}>
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="setup-overlay">
-      <form className="setup-card" onSubmit={handleSubmit}>
-        <h2>{initial ? 'Edit Connection' : 'Add VPS'}</h2>
+      <div className="setup-card">
+        <h2>{initial ? 'Edit Connection' : 'Connect Terminal'}</h2>
         <p>
-          Connect to a VPS running ttyd + Claude Code.
-          Your connection details are stored locally in your browser.
+          Enter the HTTPS domain pointing at your VPS.
+          The browser will prompt for ttyd credentials if set.
         </p>
 
         <div className="field">
@@ -40,84 +143,53 @@ export default function Setup({ onSave, onCancel, initial }) {
             onChange={e => setName(e.target.value)}
             placeholder="My VPS"
           />
-          <div className="hint">A friendly name for this connection</div>
         </div>
 
-        <div className="field-row">
-          <div className="field">
-            <label>Host / IP</label>
-            <input
-              type="text"
-              value={host}
-              onChange={e => setHost(e.target.value)}
-              placeholder="192.168.1.100 or vps.example.com"
-              required
-            />
-          </div>
-          <div className="field" style={{ maxWidth: 100 }}>
-            <label>SSH Port</label>
-            <input
-              type="number"
-              value={port}
-              onChange={e => setPort(e.target.value)}
-              placeholder="22"
-            />
+        <div className="field">
+          <label>Terminal URL</label>
+          <input
+            type="text"
+            value={url}
+            onChange={e => { setUrl(e.target.value); setError(''); }}
+            placeholder="https://terminal.example.com"
+            required
+          />
+          <div className="hint">
+            Your domain with Cloudflare proxy enabled, SSL mode "Full"
           </div>
         </div>
 
-        <div className="field-row">
-          <div className="field">
-            <label>SSH User</label>
-            <input
-              type="text"
-              value={user}
-              onChange={e => setUser(e.target.value)}
-              placeholder="root"
-            />
+        {error && (
+          <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 12 }}>
+            {error}
           </div>
-          <div className="field" style={{ maxWidth: 120 }}>
-            <label>ttyd Port</label>
-            <input
-              type="number"
-              value={ttydPort}
-              onChange={e => setTtydPort(e.target.value)}
-              placeholder="7681"
-            />
-          </div>
-        </div>
-
-        <div className="field-row">
-          <div className="field">
-            <label>ttyd Username</label>
-            <input
-              type="text"
-              value={ttydUser}
-              onChange={e => setTtydUser(e.target.value)}
-              placeholder="(optional)"
-            />
-          </div>
-          <div className="field">
-            <label>ttyd Password</label>
-            <input
-              type="password"
-              value={ttydPass}
-              onChange={e => setTtydPass(e.target.value)}
-              placeholder="(optional)"
-            />
-          </div>
-        </div>
+        )}
 
         <div className="setup-actions">
-          <button type="submit" className="btn btn-gold btn-full">
-            {initial ? 'Save Changes' : 'Connect'}
+          <button
+            type="button"
+            className="btn btn-gold btn-full"
+            onClick={handleVerify}
+            disabled={checking}
+          >
+            {checking ? 'Checking...' : 'Connect'}
           </button>
+          {!initial && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => setStep('setup')}
+            >
+              &larr; Back
+            </button>
+          )}
           {onCancel && (
             <button type="button" className="btn btn-ghost" onClick={onCancel}>
               Cancel
             </button>
           )}
         </div>
-      </form>
+      </div>
     </div>
   );
 }
