@@ -75,6 +75,8 @@ if [[ -n "$TTYD_PASS" ]]; then
     CRED_FLAG="--credential claude:$TTYD_PASS"
 fi
 
+# ttyd launches a fresh Claude session per browser connection.
+# No tmux needed — pAIne's UI handles multi-session via multiple iframes.
 cat > /etc/systemd/system/claude-terminal.service << SVEOF
 [Unit]
 Description=pAIne Claude Code Terminal

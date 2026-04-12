@@ -23,7 +23,7 @@ export default function Footer() {
       <span>
         MIT License &middot;{' '}
         <a
-          href="https://github.com/joebanks/paine"
+          href="https://github.com/sdn3rd/paine"
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: 'var(--tx2)', textDecoration: 'none' }}

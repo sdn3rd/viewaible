@@ -54,9 +54,6 @@ export default function App() {
                 <div className="vps-dot connected" />
                 <span>{active.name}</span>
               </div>
-              <span style={{ color: 'var(--tx3)' }}>
-                {active.url?.replace(/^https?:\/\//, '')}
-              </span>
             </div>
           )}
           <Terminal connection={active} />

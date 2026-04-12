@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 PROJECT="paine"
-ACCOUNT_ID="f0a9cb18c4b2fa465d144ebb2be7859b"
+ACCOUNT_ID="1958a44c637f9061a6cf574141164146"
 export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
 echo ""

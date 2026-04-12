@@ -19,15 +19,23 @@ export default function Setup({ onSave, onCancel, initial }) {
     setError('');
 
     try {
-      // Try to reach the ttyd endpoint — expect 401 (auth) or 200
-      const resp = await fetch(cleanUrl, { mode: 'no-cors' }).catch(() => null);
-      // no-cors won't give us status, but if it doesn't throw, the server is reachable
+      // Store the target URL in an HttpOnly cookie via the backend
+      const resp = await fetch('/api/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: cleanUrl }),
+      });
+
+      if (!resp.ok) {
+        throw new Error('Failed to save connection');
+      }
+
       onSave({
         name: name.trim() || new URL(cleanUrl).hostname,
         url: cleanUrl,
       });
     } catch {
-      setError('Could not reach that URL. Make sure your VPS is set up and the domain points to it.');
+      setError('Could not set up connection. Check the URL and try again.');
     } finally {
       setChecking(false);
     }
