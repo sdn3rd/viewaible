@@ -29,3 +29,4 @@ dist-ssr
 # Private config (main branch only — excluded from demo)
 config.private.yaml
 .env
+site.yaml

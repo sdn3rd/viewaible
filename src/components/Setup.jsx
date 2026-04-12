@@ -145,7 +145,7 @@ export default function Setup({ onSave, onCancel, initial }) {
 
           <div className="field">
             <label>1. Run on your VPS</label>
-            <CopyBlock text="curl -fsSL https://viewaible.app/setup.sh | bash" />
+            <CopyBlock text="curl -fsSL https://yourdomain.com/setup.sh | bash" />
           </div>
 
           <div className="field">

@@ -1,0 +1,22 @@
+# ============================================================================
+# viewAIble — Site Configuration
+#
+# Copy this file to site.yaml and fill in your details.
+# ============================================================================
+
+name: "viewAIble"
+tagline: "divide and conquer, anywhere"
+url: "https://yourdomain.com"
+
+cloudflare_account_id: "YOUR_CLOUDFLARE_ACCOUNT_ID"
+cloudflare_project: "viewaible"
+
+meta:
+  title: "viewAIble — Your VPS, Your AI, Your Browser"
+  description: "Run Claude Code on any VPS directly from your browser."
+  og_image: "/preview.png"
+
+github_repo: "https://github.com/yourusername/viewaible"
+license: "MIT"
+
+setup_url: "https://yourdomain.com/setup.sh"

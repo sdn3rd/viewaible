@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 PROJECT="viewaible"
-ACCOUNT_ID="1958a44c637f9061a6cf574141164146"
+ACCOUNT_ID="YOUR_CLOUDFLARE_ACCOUNT_ID"
 export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
 echo ""
@@ -70,5 +70,5 @@ npx wrangler pages deploy dist \
 echo ""
 echo "============================================"
 echo "  Deployed viewAIble v$VERSION"
-echo "  https://viewaible.app"
+echo "  https://yourdomain.com"
 echo "============================================"

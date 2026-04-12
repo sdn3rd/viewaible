@@ -29,7 +29,7 @@ export default function Footer() {
     }}>
       <span>viewAIble v{VERSION}</span>
       <a
-        href="https://github.com/sdn3rd/viewaible"
+        href="https://github.com/yourusername/viewaible"
         target="_blank"
         rel="noopener noreferrer"
         style={{

@@ -2,7 +2,7 @@
 # ============================================================================
 # viewAIble VPS Setup — Run this on your VPS
 #
-#   curl -fsSL https://viewaible.app/setup.sh | bash
+#   curl -fsSL https://yourdomain.com/setup.sh | bash
 #
 # Idempotent — safe to re-run. Cleans up previous installs automatically.
 # Installs: Node.js 22, Claude Code CLI, ttyd, nginx, UFW firewall
@@ -19,7 +19,7 @@ echo ""
 # ── Detect OS ──────────────────────────────────────────────────────────────
 if ! command -v apt-get &>/dev/null; then
     echo "ERROR: This script requires a Debian/Ubuntu VPS."
-    echo "See https://github.com/sdn3rd/viewaible for other distros."
+    echo "See https://github.com/yourusername/viewaible for other distros."
     exit 1
 fi
 

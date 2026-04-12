@@ -63,7 +63,7 @@ export function generateDetectBlock() {
   return `# Auto-detect distro
 ${detects.join('\nel')}
 else
-  echo "ERROR: Unsupported distro. See https://github.com/sdn3rd/viewaible for adding support."
+  echo "ERROR: Unsupported distro. See https://github.com/yourusername/viewaible for adding support."
   exit 1
 fi
 
