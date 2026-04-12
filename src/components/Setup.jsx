@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supportedDistros } from '../distros';
+import Logo from './Logo';
 
 function CopyBlock({ text }) {
   const [copied, setCopied] = useState(false);
@@ -113,6 +114,29 @@ export default function Setup({ onSave, onCancel, initial }) {
     return (
       <div className="setup-overlay">
         <div className="setup-card" style={{ maxWidth: 540 }}>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <Logo size={72} />
+            <div style={{
+              fontFamily: 'var(--fd)',
+              fontSize: 22,
+              fontWeight: 500,
+              color: 'var(--tx2)',
+              letterSpacing: '4px',
+              textTransform: 'uppercase',
+              marginTop: 10,
+            }}>
+              view<span style={{ color: 'var(--gold)', fontWeight: 900 }}>AI</span>ble
+            </div>
+            <div style={{
+              fontSize: 10,
+              color: 'var(--tx3)',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              marginTop: 4,
+            }}>
+              divide and conquer, anywhere
+            </div>
+          </div>
           <h2>Set Up Your VPS</h2>
           <p>
             Run this on your VPS to install Claude Code + terminal server.
@@ -140,13 +164,7 @@ export default function Setup({ onSave, onCancel, initial }) {
           </div>
 
           <div className="field">
-            <label>2. Authenticate Claude</label>
-            <div className="hint" style={{ marginBottom: 6 }}>SSH into your VPS and run:</div>
-            <CopyBlock text="su - claude -c 'claude auth login'" />
-          </div>
-
-          <div className="field">
-            <label>3. DNS Setup</label>
+            <label>2. DNS Setup</label>
             <div className="hint">
               Add a <strong>DNS-only</strong> (grey cloud) A record in Cloudflare pointing to your VPS IP.
             </div>

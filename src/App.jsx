@@ -32,6 +32,7 @@ export default function App() {
   const [activeId, setActiveId] = useState(null);
   const [showSetup, setShowSetup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [settings, setSettings] = useState(() => loadSettings());
   const [themePref, setThemePref] = useState(() => localStorage.getItem(THEME_KEY) || 'system');
   const [resolvedTheme, setResolvedTheme] = useState(() => resolveTheme(localStorage.getItem(THEME_KEY) || 'system'));
@@ -103,6 +104,8 @@ export default function App() {
           onAdd={() => setShowSetup(true)}
           onRemove={handleRemove}
           onSettings={() => setShowSettings(true)}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(c => !c)}
         />
         <div className="main" style={{ paddingBottom: 28 }}>
           {active && (

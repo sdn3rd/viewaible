@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import Logo from './Logo';
 
 // Layout for 1-4 panes:
 // 1: [  full  ]
@@ -135,12 +136,28 @@ export default function Terminal({ connection, settings }) {
   if (!connection) {
     return (
       <div className="empty">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="2" y="3" width="20" height="18" rx="2"/>
-          <path d="M7 9l3 3-3 3"/>
-          <line x1="13" y1="15" x2="17" y2="15"/>
-        </svg>
-        <p>Add a terminal connection to get started with Claude Code in your browser.</p>
+        <Logo size={96} />
+        <div style={{
+          fontFamily: 'var(--fd)',
+          fontSize: 28,
+          fontWeight: 500,
+          color: 'var(--tx2)',
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+        }}>
+          view<span style={{ color: 'var(--gold)', fontWeight: 900 }}>AI</span>ble
+        </div>
+        <div style={{
+          fontSize: 12,
+          color: 'var(--tx3)',
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+        }}>
+          divide and conquer, anywhere
+        </div>
+        <p style={{ marginTop: 16 }}>
+          Add a VPS to get started with Claude Code in your browser.
+        </p>
       </div>
     );
   }
