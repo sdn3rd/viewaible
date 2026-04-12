@@ -16,6 +16,22 @@ export default function Setup({ onSave, onCancel, initial }) {
       cleanUrl = 'http://' + cleanUrl;
     }
 
+    // Detect raw IP addresses — Cloudflare Workers can't fetch IPs directly
+    try {
+      const hostname = new URL(cleanUrl).hostname;
+      if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
+        setError(
+          'Cloudflare Workers cannot connect to raw IP addresses. ' +
+          'Add a DNS-only (grey cloud) A record in Cloudflare pointing to your VPS IP, ' +
+          'then use that hostname instead (e.g. http://vps.example.com:7681).'
+        );
+        return;
+      }
+    } catch {
+      setError('Invalid URL format.');
+      return;
+    }
+
     setChecking(true);
     setError('');
 

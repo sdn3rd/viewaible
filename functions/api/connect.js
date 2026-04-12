@@ -8,7 +8,14 @@ export async function onRequestPost({ request }) {
     }
 
     // Validate it's a proper URL
-    new URL(url);
+    const parsed = new URL(url);
+
+    // Reject raw IP addresses — Workers can't fetch them
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname)) {
+      return new Response(JSON.stringify({
+        error: 'Raw IP addresses are not supported. Use a DNS-only (grey cloud) hostname instead.'
+      }), { status: 400 });
+    }
 
     // Encode to base64 for cookie safety
     const encoded = btoa(url);

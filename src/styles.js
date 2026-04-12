@@ -1,5 +1,5 @@
 export const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap');
 
 :root {
   --bg: #0B0B14;
@@ -14,7 +14,7 @@ export const CSS = `
   --gold2: #F0D060;
   --red: #C0392B;
   --green: #2ECC71;
-  --fd: 'Cinzel', serif;
+  --fd: 'Orbitron', sans-serif;
   --fb: 'Source Sans 3', sans-serif;
 }
 
@@ -52,15 +52,16 @@ html, body, #root {
 
 .sidebar-header h1 {
   font-family: var(--fd);
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 2px;
+  color: var(--tx2);
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .sidebar-header h1 span {
-  color: var(--tx);
-  font-weight: 400;
+  color: var(--gold);
+  font-weight: 900;
 }
 
 .vps-list {
