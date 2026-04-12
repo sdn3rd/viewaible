@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================================
-# pAIne VPS Setup — Run this on your VPS
+# viewAIble VPS Setup — Run this on your VPS
 #
-#   curl -fsSL https://paine.pages.dev/setup.sh | bash
+#   curl -fsSL https://viewaible.app/setup.sh | bash
 #
 # Idempotent — safe to re-run. Cleans up previous installs automatically.
 # Installs: Node.js 22, Claude Code CLI, ttyd, nginx, UFW firewall
@@ -12,14 +12,14 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo ""
 echo "============================================"
-echo "  pAIne VPS Setup"
+echo "  viewAIble VPS Setup"
 echo "============================================"
 echo ""
 
 # ── Detect OS ──────────────────────────────────────────────────────────────
 if ! command -v apt-get &>/dev/null; then
     echo "ERROR: This script requires a Debian/Ubuntu VPS."
-    echo "See https://github.com/sdn3rd/paine for other distros."
+    echo "See https://github.com/sdn3rd/viewaible for other distros."
     exit 1
 fi
 
@@ -74,10 +74,10 @@ echo '{"hasCompletedOnboarding":true}' > /home/claude/.claude.json
 chown -R claude:claude /home/claude/.claude /home/claude/.claude.json
 
 # ttyd launches a fresh Claude session per browser connection.
-# pAIne's UI handles multi-session via multiple iframes.
+# viewAIble's UI handles multi-session via multiple iframes.
 cat > /etc/systemd/system/claude-terminal.service << 'SVEOF'
 [Unit]
-Description=pAIne Claude Code Terminal
+Description=viewAIble Claude Code Terminal
 After=network.target
 
 [Service]
@@ -107,9 +107,9 @@ mkdir -p /etc/nginx/certs
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
     -keyout /etc/nginx/certs/origin-key.pem \
     -out /etc/nginx/certs/origin.pem \
-    -subj '/CN=paine-terminal' >/dev/null 2>&1
+    -subj '/CN=viewaible-terminal' >/dev/null 2>&1
 
-cat > /etc/nginx/sites-available/paine << 'NGEOF'
+cat > /etc/nginx/sites-available/viewaible << 'NGEOF'
 server {
     listen 443 ssl;
     server_name _;
@@ -133,7 +133,7 @@ server {
 }
 NGEOF
 
-ln -sf /etc/nginx/sites-available/paine /etc/nginx/sites-enabled/paine 2>/dev/null || true
+ln -sf /etc/nginx/sites-available/viewaible /etc/nginx/sites-enabled/viewaible 2>/dev/null || true
 rm -f /etc/nginx/sites-enabled/default
 nginx -t 2>/dev/null
 
@@ -167,8 +167,26 @@ for ip in \
     ufw allow from "$ip" to any port 443 proto tcp >/dev/null 2>&1
 done
 
-# ttyd (7681) — localhost only (nginx proxies to it)
+# ttyd (7681) — Cloudflare IPs + localhost (Worker connects here directly)
 ufw allow from 127.0.0.1 to any port 7681 proto tcp >/dev/null 2>&1
+for ip in \
+    173.245.48.0/20 \
+    103.21.244.0/22 \
+    103.22.200.0/22 \
+    103.31.4.0/22 \
+    141.101.64.0/18 \
+    108.162.192.0/18 \
+    190.93.240.0/20 \
+    188.114.96.0/20 \
+    197.234.240.0/22 \
+    198.41.128.0/17 \
+    162.158.0.0/15 \
+    104.16.0.0/13 \
+    104.24.0.0/14 \
+    172.64.0.0/13 \
+    131.0.72.0/22; do
+    ufw allow from "$ip" to any port 7681 proto tcp >/dev/null 2>&1
+done
 
 # Enable UFW
 ufw default deny incoming >/dev/null 2>&1
@@ -177,7 +195,7 @@ ufw --force enable >/dev/null 2>&1
 
 echo "  SSH: open everywhere"
 echo "  443: Cloudflare IPs only"
-echo "  7681: localhost only"
+echo "  7681: Cloudflare IPs + localhost only"
 
 # ── Start services ───────────────────────────────────────────────────────
 systemctl restart nginx
@@ -191,7 +209,7 @@ systemctl is-active --quiet claude-terminal.service && TTYD_OK="yes"
 systemctl is-active --quiet nginx && NGINX_OK="yes"
 
 echo "============================================"
-echo "  pAIne VPS Setup Complete"
+echo "  viewAIble VPS Setup Complete"
 echo "============================================"
 echo ""
 echo "  Services:"
@@ -206,7 +224,7 @@ echo ""
 echo "  Next steps:"
 echo "  1. Add a Cloudflare DNS A record → $(curl -s4 ifconfig.me)"
 echo "  2. Set Cloudflare SSL mode to 'Full' (not Strict)"
-echo "  3. Go to https://viewaible.app (or paine.pages.dev)"
+echo "  3. Go to https://viewaible.app (or viewaible.app)"
 echo "  4. Enter https://your-domain.com as the terminal URL"
 echo ""
 echo "  To authenticate Claude Code:"

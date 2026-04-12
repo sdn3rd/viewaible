@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-PROJECT="paine"
+PROJECT="viewaible"
 ACCOUNT_ID="1958a44c637f9061a6cf574141164146"
 export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
@@ -70,5 +70,5 @@ npx wrangler pages deploy dist \
 echo ""
 echo "============================================"
 echo "  Deployed pAIne v$VERSION"
-echo "  https://paine.pages.dev"
+echo "  https://viewaible.app"
 echo "============================================"

@@ -63,7 +63,7 @@ export function generateDetectBlock() {
   return `# Auto-detect distro
 ${detects.join('\nel')}
 else
-  echo "ERROR: Unsupported distro. See https://github.com/joebanks/paine for adding support."
+  echo "ERROR: Unsupported distro. See https://github.com/sdn3rd/viewaible for adding support."
   exit 1
 fi
 
@@ -84,7 +84,7 @@ export function generateSetupScript(options = {}) {
 
   return `#!/usr/bin/env bash
 # ============================================================================
-# pAIne VPS Setup — Auto-generated
+# viewAIble VPS Setup — Auto-generated
 # Installs: Node.js 22, Claude Code CLI, ttyd, nginx (SSL reverse proxy)
 # ============================================================================
 set -euo pipefail
@@ -92,7 +92,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo ""
 echo "============================================"
-echo "  pAIne VPS Setup"
+echo "  viewAIble VPS Setup"
 echo "============================================"
 echo ""
 
@@ -131,7 +131,7 @@ chown -R claude:claude /home/claude/.claude /home/claude/.claude.json
 
 cat > /etc/systemd/system/claude-terminal.service << 'SVEOF'
 [Unit]
-Description=pAIne Claude Code Terminal
+Description=viewAIble Claude Code Terminal
 After=network.target
 
 [Service]
@@ -152,9 +152,9 @@ if [ ! -f /etc/nginx/certs/origin.pem ]; then
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \\
         -keyout /etc/nginx/certs/origin-key.pem \\
         -out /etc/nginx/certs/origin.pem \\
-        -subj '/CN=paine-terminal' >/dev/null 2>&1
+        -subj '/CN=viewaible-terminal' >/dev/null 2>&1
 fi
-cat > /etc/nginx/sites-available/paine << 'NGEOF'
+cat > /etc/nginx/sites-available/viewaible << 'NGEOF'
 server {
     listen 443 ssl;
     server_name _;
@@ -175,7 +175,7 @@ server {
     }
 }
 NGEOF
-ln -sf /etc/nginx/sites-available/paine /etc/nginx/sites-enabled/paine 2>/dev/null || true
+ln -sf /etc/nginx/sites-available/viewaible /etc/nginx/sites-enabled/viewaible 2>/dev/null || true
 rm -f /etc/nginx/sites-enabled/default
 systemctl restart nginx
 systemctl restart claude-terminal.service
@@ -187,7 +187,7 @@ echo "============================================"
 echo ""
 echo "  1. Point a Cloudflare DNS record at this VPS"
 echo "  2. Set Cloudflare SSL mode to 'Full'"
-echo "  3. Enter your domain in pAIne and connect"
+echo "  3. Enter your domain in viewAIble and connect"
 echo ""
 echo "  Auth: ssh root@<vps> then: su - claude -c 'claude auth login'"
 echo "============================================"

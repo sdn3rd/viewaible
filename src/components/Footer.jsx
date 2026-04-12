@@ -19,11 +19,11 @@ export default function Footer() {
       zIndex: 5,
       fontFamily: 'var(--fb)',
     }}>
-      <span>pAIne v{VERSION}</span>
+      <span>viewAIble v{VERSION}</span>
       <span>
         MIT License &middot;{' '}
         <a
-          href="https://github.com/sdn3rd/paine"
+          href="https://github.com/sdn3rd/viewaible"
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: 'var(--tx2)', textDecoration: 'none' }}

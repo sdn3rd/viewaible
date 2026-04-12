@@ -5,7 +5,7 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
     <div className="sidebar">
       <div className="sidebar-header">
         <Logo size={32} />
-        <h1>p<span>AI</span>ne</h1>
+        <h1>view<span>AI</span>ble</h1>
       </div>
 
       <div className="vps-list">

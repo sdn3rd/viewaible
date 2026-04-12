@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'paine_connections';
+const STORAGE_KEY = 'viewaible_connections';
 
 export function loadConnections() {
   try {

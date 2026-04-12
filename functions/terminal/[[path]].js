@@ -4,7 +4,7 @@
 
 function getTargetUrl(request) {
   const cookie = request.headers.get('Cookie') || '';
-  const match = cookie.match(/paine_target=([^;]+)/);
+  const match = cookie.match(/viewaible_target=([^;]+)/);
   if (!match) return null;
   try {
     return atob(match[1]);

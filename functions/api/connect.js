@@ -16,7 +16,7 @@ export async function onRequestPost({ request }) {
     return new Response(JSON.stringify({ ok: true }), {
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': `paine_target=${encoded}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000`,
+        'Set-Cookie': `viewaible_target=${encoded}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000`,
       },
     });
   } catch (e) {

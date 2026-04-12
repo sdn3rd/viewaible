@@ -65,11 +65,11 @@ export default function Setup({ onSave, onCancel, initial }) {
               position: 'relative',
             }}
               onClick={() => {
-                navigator.clipboard.writeText('curl -fsSL https://paine.pages.dev/setup.sh | bash');
+                navigator.clipboard.writeText('curl -fsSL https://viewaible.app/setup.sh | bash');
               }}
               title="Click to copy"
             >
-              curl -fsSL https://paine.pages.dev/setup.sh | bash
+              curl -fsSL https://viewaible.app/setup.sh | bash
               <span style={{
                 position: 'absolute',
                 top: 8,
@@ -138,7 +138,7 @@ export default function Setup({ onSave, onCancel, initial }) {
       <div className="setup-card" style={{ maxWidth: 520 }}>
         <h2>{initial ? 'Edit Connection' : 'Connect Terminal'}</h2>
         <p>
-          Your VPS address is proxied through pAIne and never exposed to the browser.
+          Your VPS address is proxied through viewAIble and never exposed to the browser.
         </p>
 
         <div className="field">
@@ -151,89 +151,43 @@ export default function Setup({ onSave, onCancel, initial }) {
           />
         </div>
 
-        {/* Connection method selector */}
         <div className="field">
-          <label>Connection Method</label>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-            <button
-              type="button"
-              className={`btn btn-sm ${method === 'ip' ? 'btn-gold' : 'btn-ghost'}`}
-              onClick={() => { setMethod('ip'); setUrl(''); }}
-              style={{ flex: 1 }}
-            >
-              Direct IP (recommended)
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm ${method === 'dns' ? 'btn-gold' : 'btn-ghost'}`}
-              onClick={() => { setMethod('dns'); setUrl(''); }}
-              style={{ flex: 1 }}
-            >
-              DNS hostname
-            </button>
+          <label>Terminal Hostname</label>
+          <input
+            type="text"
+            value={url}
+            onChange={e => { setUrl(e.target.value); setError(''); }}
+            placeholder="http://vps.example.com:7681"
+            required
+          />
+          <div className="hint">
+            A DNS hostname pointing at your VPS with ttyd port.
           </div>
         </div>
 
-        {method === 'ip' ? (
-          <div className="field">
-            <label>VPS IP + Port</label>
-            <input
-              type="text"
-              value={url}
-              onChange={e => { setUrl(e.target.value); setError(''); }}
-              placeholder="http://203.0.113.50:7681"
-              required
-            />
-            <div className="hint">
-              Enter your VPS IP with ttyd port 7681. The setup script configures
-              UFW to only allow Cloudflare and localhost — direct browser access is blocked.
-            </div>
-            <div style={{
-              marginTop: 8,
-              padding: '8px 10px',
-              background: 'var(--cd2)',
-              borderRadius: 4,
-              fontSize: 11,
-              color: 'var(--tx2)',
-              lineHeight: 1.5,
-            }}>
-              <strong style={{ color: 'var(--gold)' }}>How it works:</strong> pAIne's
-              server connects to your VPS on your behalf. Your IP address never
-              appears in the browser, page source, or network tab. The connection
-              is stored in a secure server-side cookie.
-            </div>
-          </div>
-        ) : (
-          <div className="field">
-            <label>Hostname + Port</label>
-            <input
-              type="text"
-              value={url}
-              onChange={e => { setUrl(e.target.value); setError(''); }}
-              placeholder="https://vps.example.com"
-              required
-            />
-            <div className="hint">
-              Use a DNS record pointing at your VPS. Must be <strong>DNS-only</strong> (grey
-              cloud) in Cloudflare — not proxied — to avoid routing loops.
-            </div>
-            <div style={{
-              marginTop: 8,
-              padding: '8px 10px',
-              background: 'var(--cd2)',
-              borderRadius: 4,
-              fontSize: 11,
-              color: 'var(--tx2)',
-              lineHeight: 1.5,
-            }}>
-              <strong style={{ color: 'var(--gold)' }}>DNS setup:</strong> Add an A
-              record for your subdomain pointing to your VPS IP. Set it to <strong>DNS
-              only</strong> (grey cloud icon). If you use the orange cloud (proxied),
-              the connection will loop and fail. The hostname is only used server-side
-              and never exposed to the browser.
-            </div>
-          </div>
-        )}
+        <div style={{
+          padding: '10px 12px',
+          background: 'var(--cd2)',
+          borderRadius: 6,
+          fontSize: 11,
+          color: 'var(--tx2)',
+          lineHeight: 1.6,
+          marginBottom: 16,
+        }}>
+          <strong style={{ color: 'var(--gold)', display: 'block', marginBottom: 4 }}>
+            Cloudflare DNS Setup
+          </strong>
+          1. Add an <strong>A record</strong> for a subdomain (e.g. <code style={{ color: 'var(--tx)' }}>vps.example.com</code>)
+             pointing to your VPS IP<br/>
+          2. Set it to <strong style={{ color: 'var(--tx)' }}>DNS only</strong> (grey
+             cloud) — <strong style={{ color: 'var(--red)' }}>not proxied</strong><br/>
+          3. Enter <code style={{ color: 'var(--tx)' }}>http://vps.example.com:7681</code> above<br/><br/>
+          <span style={{ color: 'var(--tx3)' }}>
+            Why grey cloud? viewAIble's server connects to your VPS directly.
+            If the DNS is proxied (orange cloud), the request loops through Cloudflare
+            and fails. Your hostname is stored server-side only — never visible in the browser.
+          </span>
+        </div>
 
         {error && (
           <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 12, marginTop: 8 }}>
