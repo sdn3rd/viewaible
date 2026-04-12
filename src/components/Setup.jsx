@@ -69,7 +69,7 @@ export default function Setup({ onSave, onCancel, initial }) {
   const [error, setError] = useState('');
 
   const handleConnect = async () => {
-    const h = host.trim();
+    const h = host.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/:.*$/, '');
     if (!h) return;
 
     const p = parseInt(port) || 7681;
