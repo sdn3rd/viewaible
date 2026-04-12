@@ -4,7 +4,7 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <Logo size={28} />
+        <Logo size={36} />
         <h1>view<span>AI</span>ble</h1>
       </div>
 
