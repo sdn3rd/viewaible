@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supportedDistros } from '../distros';
 import Logo from './Logo';
+import { distroIconMap } from './DistroIcons';
 
 function CopyBlock({ text }) {
   const [copied, setCopied] = useState(false);
@@ -149,17 +150,26 @@ export default function Setup({ onSave, onCancel, initial }) {
 
           <div className="field">
             <label>Supported</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
-              {supportedDistros.map(d => (
-                <span key={d.id} style={{
-                  background: 'var(--cd2)',
-                  border: '1px solid var(--bd)',
-                  borderRadius: 4,
-                  padding: '2px 7px',
-                  fontSize: 10,
-                  color: 'var(--tx2)',
-                }}>{d.name}</span>
-              ))}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+              {supportedDistros.map(d => {
+                const Icon = distroIconMap[d.id];
+                return (
+                  <span key={d.id} style={{
+                    background: 'var(--cd2)',
+                    border: '1px solid var(--bd)',
+                    borderRadius: 6,
+                    padding: '4px 8px',
+                    fontSize: 10,
+                    color: 'var(--tx2)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                  }}>
+                    {Icon && <Icon size={14} />}
+                    {d.name}
+                  </span>
+                );
+              })}
             </div>
           </div>
 
