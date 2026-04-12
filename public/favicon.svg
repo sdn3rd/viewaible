@@ -1,57 +1,8 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="512" height="512" rx="96" fill="#0B0B14"/>
-
-  <!-- Terminal body -->
-  <rect x="48" y="72" width="416" height="368" rx="32" fill="#1A1A2E"/>
-
-  <!-- Title bar -->
-  <rect x="48" y="72" width="416" height="72" rx="32" fill="#222240"/>
-  <rect x="48" y="112" width="416" height="32" fill="#222240"/>
-
-  <!-- Window dots -->
-  <circle cx="100" cy="108" r="14" fill="#C0392B"/>
-  <circle cx="148" cy="108" r="14" fill="#D4AF37"/>
-  <circle cx="196" cy="108" r="14" fill="#2ECC71"/>
-
-  <!-- Screen area -->
-  <rect x="64" y="156" width="384" height="268" rx="8" fill="#0B0B14"/>
-
-  <!-- Golden spiral (fibonacci-style, cut into the screen) -->
-  <path
-    d="M256 310
-       a30 30 0 0 1 30 -30
-       a55 55 0 0 1 -55 55
-       a85 85 0 0 1 85 -85
-       a120 120 0 0 1 -120 120"
-    stroke="#D4AF37"
-    stroke-width="6"
-    fill="none"
-    stroke-linecap="round"
-    opacity="0.85"
-  />
-
-  <!-- Inner spiral -->
-  <path
-    d="M256 310
-       a12 12 0 0 0 -12 12
-       a20 20 0 0 0 20 -20"
-    stroke="#D4AF37"
-    stroke-width="4"
-    fill="none"
-    stroke-linecap="round"
-    opacity="0.5"
-  />
-
-  <!-- Void center glow -->
-  <circle cx="256" cy="310" r="16" fill="#D4AF37" opacity="0.08"/>
-  <circle cx="256" cy="310" r="8" fill="#D4AF37" opacity="0.2"/>
-  <circle cx="256" cy="310" r="3" fill="#D4AF37" opacity="0.6"/>
-
-  <!-- Faint terminal prompt lines -->
-  <rect x="88" y="176" width="48" height="4" rx="2" fill="#D4AF37" opacity="0.35"/>
-  <rect x="144" y="176" width="96" height="4" rx="2" fill="#8888AA" opacity="0.2"/>
-  <rect x="88" y="192" width="36" height="4" rx="2" fill="#D4AF37" opacity="0.25"/>
-  <rect x="132" y="192" width="72" height="4" rx="2" fill="#8888AA" opacity="0.15"/>
-  <rect x="88" y="208" width="28" height="4" rx="2" fill="#D4AF37" opacity="0.15"/>
+<svg width="512" height="512" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg">
+  <rect x="155" y="50" width="370" height="295" rx="18" fill="#161625"/>
+  <rect x="170" y="65" width="340" height="265" rx="10" fill="#0B0B14"/>
+  <g transform="translate(340,197)">
+    <path d="M18,0 L17.8,10.3 L11.6,20.1 L0,25.7 L-14.2,24.5 L-26.8,15.5 L-33.5,0 L-31.3,-18 L-19.3,-33.5 L0,-41.3 L21.9,-38 L40.2,-23.2 L49,0 L44.7,25.8 L27.1,46.9 L0,56.7 L-29.7,51.4 L-53.6,31 L-64.5,0 L-58.1,-33.5 L-34.8,-60.3 L0,-72.3 L37.4,-64.8 L67.1,-38.7 L80,0 L66.5,-38.4 L36.8,-63.7 L0,-70.3 L-33.5,-58 L-55.2,-31.9 L-60.5,0 L-49.6,28.6 L-27,46.8 L0,50.7 L23.7,41.1 L38.3,22.1 L41,0 L32.7,-18.9 L17.3,-29.9 L0,-31.3 L-14,-24.2 L-21.5,-12.4 L-21.5,0 L-15.8,9.1 L-7.5,13 L0,11.7 L4.2,7.3 L4.6,2.6 L2,0Z" fill="#D4AF37"/>
+    <circle cx="0" cy="0" r="4" fill="#D4AF37"/>
+  </g>
 </svg>

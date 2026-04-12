@@ -1,6 +1,64 @@
 import { useState } from 'react';
 import { supportedDistros } from '../distros';
 
+function CopyBlock({ text }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={handleCopy}
+        title="Copy"
+        style={{
+          position: 'absolute',
+          top: -10,
+          right: -4,
+          background: copied ? 'var(--green)' : 'var(--cd2)',
+          border: '1px solid var(--bd)',
+          borderRadius: 6,
+          width: 28,
+          height: 28,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.15s',
+          zIndex: 1,
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke={copied ? '#fff' : 'var(--tx2)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {copied ? (
+            <polyline points="20 6 9 17 4 12"/>
+          ) : (
+            <>
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </>
+          )}
+        </svg>
+      </button>
+      <div style={{
+        background: 'var(--bg)',
+        border: '1px solid var(--bd)',
+        borderRadius: 'var(--radius)',
+        padding: '10px 14px',
+        fontFamily: 'var(--mono)',
+        fontSize: 12,
+        color: 'var(--gold)',
+        wordBreak: 'break-all',
+        lineHeight: 1.6,
+      }}>
+        {text}
+      </div>
+    </div>
+  );
+}
+
 export default function Setup({ onSave, onCancel, initial }) {
   const [step, setStep] = useState(initial ? 'connect' : 'setup');
   const [name, setName] = useState(initial?.name || '');
@@ -62,27 +120,7 @@ export default function Setup({ onSave, onCancel, initial }) {
 
           <div className="field">
             <label>1. Run on your VPS</label>
-            <div style={{
-              background: 'var(--bg)',
-              border: '1px solid var(--bd)',
-              borderRadius: 'var(--radius)',
-              padding: '12px 14px',
-              fontFamily: 'var(--mono)',
-              fontSize: 12,
-              color: 'var(--gold)',
-              wordBreak: 'break-all',
-              lineHeight: 1.6,
-              cursor: 'pointer',
-              position: 'relative',
-            }}
-              onClick={() => navigator.clipboard.writeText('curl -fsSL https://viewaible.app/setup.sh | bash')}
-              title="Click to copy"
-            >
-              curl -fsSL https://viewaible.app/setup.sh | bash
-              <span style={{ position: 'absolute', top: 8, right: 10, fontSize: 10, color: 'var(--tx3)' }}>
-                click to copy
-              </span>
-            </div>
+            <CopyBlock text="curl -fsSL https://viewaible.app/setup.sh | bash" />
           </div>
 
           <div className="field">
@@ -103,12 +141,8 @@ export default function Setup({ onSave, onCancel, initial }) {
 
           <div className="field">
             <label>2. Authenticate Claude</label>
-            <div className="hint">
-              SSH into your VPS and run:
-              <code style={{ color: 'var(--gold)', fontSize: 12, display: 'block', marginTop: 4 }}>
-                su - claude -c 'claude auth login'
-              </code>
-            </div>
+            <div className="hint" style={{ marginBottom: 6 }}>SSH into your VPS and run:</div>
+            <CopyBlock text="su - claude -c 'claude auth login'" />
           </div>
 
           <div className="field">
