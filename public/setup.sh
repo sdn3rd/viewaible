@@ -4,8 +4,8 @@
 #
 #   curl -fsSL https://paine.pages.dev/setup.sh | bash
 #
-# Installs: Node.js 22, Claude Code CLI, ttyd, nginx (SSL reverse proxy)
-# After: Point a Cloudflare DNS record at this VPS, then connect via pAIne.
+# Idempotent — safe to re-run. Cleans up previous installs automatically.
+# Installs: Node.js 22, Claude Code CLI, ttyd, nginx, UFW firewall
 # ============================================================================
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
@@ -19,36 +19,45 @@ echo ""
 # ── Detect OS ──────────────────────────────────────────────────────────────
 if ! command -v apt-get &>/dev/null; then
     echo "ERROR: This script requires a Debian/Ubuntu VPS."
+    echo "See https://github.com/sdn3rd/paine for other distros."
     exit 1
 fi
 
-# ── 1. System packages ────────────────────────────────────────────────────
-echo "[1/6] System packages..."
+# ── Cleanup from previous runs ────────────────────────────────────────────
+echo "[0/7] Cleaning up previous install..."
+systemctl stop claude-terminal.service 2>/dev/null || true
+systemctl stop nginx 2>/dev/null || true
+# Flush old iptables rules for 7681
+iptables -D INPUT -p tcp --dport 7681 -j DROP 2>/dev/null || true
+iptables -D INPUT -p tcp --dport 7681 -s 127.0.0.1 -j ACCEPT 2>/dev/null || true
+echo "  done"
+
+# ── 1. System packages ───────────────────────────────────────────────────
+echo "[1/7] System packages..."
 apt-get update -qq
-apt-get install -y -qq tmux curl wget nginx openssl >/dev/null 2>&1
+apt-get install -y -qq tmux curl wget nginx openssl ufw >/dev/null 2>&1
 echo "  done"
 
 # ── 2. Node.js 22 ────────────────────────────────────────────────────────
-echo "[2/6] Node.js 22..."
+echo "[2/7] Node.js 22..."
 if ! command -v node &>/dev/null || [[ "$(node -v)" != v22* ]]; then
     curl -fsSL https://deb.nodesource.com/setup_22.x 2>/dev/null | bash - >/dev/null 2>&1
     apt-get install -y -qq nodejs >/dev/null 2>&1
 fi
 echo "  $(node -v) / npm $(npm -v)"
 
-# ── 3. Claude Code CLI ───────────────────────────────────────────────────
-echo "[3/6] Claude Code CLI..."
+# ── 3. Claude Code CLI ──────────────────────────────────────────────────
+echo "[3/7] Claude Code CLI..."
 npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || true
 echo "  $(claude --version 2>/dev/null || echo 'installed')"
 
-# ── 4. ttyd ───────────────────────────────────────────────────────────────
-echo "[4/6] ttyd..."
-systemctl stop claude-terminal.service 2>/dev/null || true
+# ── 4. ttyd ──────────────────────────────────────────────────────────────
+echo "[4/7] ttyd..."
 wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64
 chmod +x /usr/local/bin/ttyd
 
-# ── 5. Create session user + systemd service ─────────────────────────────
-echo "[5/6] Session user + service..."
+# ── 5. Session user + systemd service ────────────────────────────────────
+echo "[5/7] Session user + service..."
 if ! id "claude" &>/dev/null; then
     useradd -m -s /bin/bash "claude"
 fi
@@ -64,33 +73,21 @@ mkdir -p /home/claude/.claude
 echo '{"hasCompletedOnboarding":true}' > /home/claude/.claude.json
 chown -R claude:claude /home/claude/.claude /home/claude/.claude.json
 
-# Prompt for ttyd password
-TTYD_PASS=""
-if [[ -t 0 ]]; then
-    read -rp "  Set a ttyd password (leave empty for none): " TTYD_PASS
-fi
-
-CRED_FLAG=""
-if [[ -n "$TTYD_PASS" ]]; then
-    CRED_FLAG="--credential claude:$TTYD_PASS"
-fi
-
 # ttyd launches a fresh Claude session per browser connection.
-# No tmux needed — pAIne's UI handles multi-session via multiple iframes.
-cat > /etc/systemd/system/claude-terminal.service << SVEOF
+# pAIne's UI handles multi-session via multiple iframes.
+cat > /etc/systemd/system/claude-terminal.service << 'SVEOF'
 [Unit]
 Description=pAIne Claude Code Terminal
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/ttyd \\
-    --port 7681 \\
-    $CRED_FLAG \\
-    --writable \\
-    --terminal-type xterm-256color \\
-    --client-option fontSize=13 \\
-    --client-option fontFamily='JetBrains Mono,Fira Code,Consolas,monospace' \\
+ExecStart=/usr/local/bin/ttyd \
+    --port 7681 \
+    --writable \
+    --terminal-type xterm-256color \
+    --client-option fontSize=13 \
+    --client-option fontFamily='JetBrains Mono,Fira Code,Consolas,monospace' \
     su - claude -c 'claude; exec bash'
 Restart=on-failure
 RestartSec=3
@@ -102,15 +99,15 @@ SVEOF
 systemctl daemon-reload
 systemctl enable claude-terminal.service >/dev/null 2>&1
 
-# ── 6. Nginx reverse proxy with self-signed cert ─────────────────────────
-echo "[6/6] Nginx SSL proxy..."
+# ── 6. Nginx reverse proxy with self-signed cert ────────────────────────
+echo "[6/7] Nginx SSL proxy..."
 mkdir -p /etc/nginx/certs
-if [[ ! -f /etc/nginx/certs/origin.pem ]]; then
-    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-        -keyout /etc/nginx/certs/origin-key.pem \
-        -out /etc/nginx/certs/origin.pem \
-        -subj '/CN=paine-terminal' >/dev/null 2>&1
-fi
+
+# Always regenerate cert (idempotent)
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+    -keyout /etc/nginx/certs/origin-key.pem \
+    -out /etc/nginx/certs/origin.pem \
+    -subj '/CN=paine-terminal' >/dev/null 2>&1
 
 cat > /etc/nginx/sites-available/paine << 'NGEOF'
 server {
@@ -136,29 +133,84 @@ server {
 }
 NGEOF
 
-ln -sf /etc/nginx/sites-available/paine /etc/nginx/sites-enabled/paine
+ln -sf /etc/nginx/sites-available/paine /etc/nginx/sites-enabled/paine 2>/dev/null || true
 rm -f /etc/nginx/sites-enabled/default
+nginx -t 2>/dev/null
 
-# Start services
+# ── 7. UFW Firewall ─────────────────────────────────────────────────────
+echo "[7/7] UFW firewall..."
+
+# Reset UFW to clean state (keep SSH!)
+ufw --force reset >/dev/null 2>&1
+
+# SSH — open to everywhere
+ufw allow 22/tcp >/dev/null 2>&1
+
+# HTTPS (443) — Cloudflare IPs only
+# Cloudflare IPv4 ranges: https://www.cloudflare.com/ips-v4
+for ip in \
+    173.245.48.0/20 \
+    103.21.244.0/22 \
+    103.22.200.0/22 \
+    103.31.4.0/22 \
+    141.101.64.0/18 \
+    108.162.192.0/18 \
+    190.93.240.0/20 \
+    188.114.96.0/20 \
+    197.234.240.0/22 \
+    198.41.128.0/17 \
+    162.158.0.0/15 \
+    104.16.0.0/13 \
+    104.24.0.0/14 \
+    172.64.0.0/13 \
+    131.0.72.0/22; do
+    ufw allow from "$ip" to any port 443 proto tcp >/dev/null 2>&1
+done
+
+# ttyd (7681) — localhost only (nginx proxies to it)
+ufw allow from 127.0.0.1 to any port 7681 proto tcp >/dev/null 2>&1
+
+# Enable UFW
+ufw default deny incoming >/dev/null 2>&1
+ufw default allow outgoing >/dev/null 2>&1
+ufw --force enable >/dev/null 2>&1
+
+echo "  SSH: open everywhere"
+echo "  443: Cloudflare IPs only"
+echo "  7681: localhost only"
+
+# ── Start services ───────────────────────────────────────────────────────
 systemctl restart nginx
 systemctl restart claude-terminal.service
 
+# ── Verify ───────────────────────────────────────────────────────────────
 echo ""
+TTYD_OK="no"
+NGINX_OK="no"
+systemctl is-active --quiet claude-terminal.service && TTYD_OK="yes"
+systemctl is-active --quiet nginx && NGINX_OK="yes"
+
 echo "============================================"
 echo "  pAIne VPS Setup Complete"
 echo "============================================"
 echo ""
-echo "  Next steps:"
-echo "  1. Point a Cloudflare DNS record at this VPS IP"
-echo "  2. Set Cloudflare SSL mode to 'Full'"
-echo "  3. Go to https://paine.pages.dev"
-echo "  4. Enter your domain as the terminal URL"
+echo "  Services:"
+echo "    ttyd:  $TTYD_OK"
+echo "    nginx: $NGINX_OK"
 echo ""
-echo "  ttyd is on port 7681 (direct)"
-echo "  nginx proxies port 443 (SSL)"
+echo "  Firewall:"
+echo "    SSH (22):   open"
+echo "    HTTPS (443): Cloudflare only"
+echo "    ttyd (7681): localhost only"
+echo ""
+echo "  Next steps:"
+echo "  1. Add a Cloudflare DNS A record → $(curl -s4 ifconfig.me)"
+echo "  2. Set Cloudflare SSL mode to 'Full' (not Strict)"
+echo "  3. Go to https://viewaible.app (or paine.pages.dev)"
+echo "  4. Enter https://your-domain.com as the terminal URL"
 echo ""
 echo "  To authenticate Claude Code:"
-echo "    ssh root@<this-vps>"
+echo "    ssh root@$(hostname -I | awk '{print $1}')"
 echo "    su - claude -c 'claude auth login'"
 echo ""
 echo "============================================"

@@ -26,17 +26,15 @@ export async function onRequest({ request, params }) {
   // Check if this is a WebSocket upgrade
   const upgradeHeader = request.headers.get('Upgrade');
   if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
-    // Cloudflare Workers WebSocket proxy
-    const wsUrl = targetUrl.toString().replace(/^http/, 'ws');
-    const resp = await fetch(wsUrl, {
+    const resp = await fetch(targetUrl.toString(), {
       headers: request.headers,
     });
     return resp;
   }
 
-  // Regular HTTP proxy
+  // Regular HTTP proxy — connect directly to origin, skip CF proxy loop
   const proxyHeaders = new Headers(request.headers);
-  proxyHeaders.delete('Cookie'); // Don't forward our cookies to the VPS
+  proxyHeaders.delete('Cookie');
   proxyHeaders.set('Host', new URL(targetBase).host);
 
   const resp = await fetch(targetUrl.toString(), {
@@ -45,9 +43,8 @@ export async function onRequest({ request, params }) {
     body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
   });
 
-  // Forward the response back
   const respHeaders = new Headers(resp.headers);
-  respHeaders.delete('Set-Cookie'); // Don't leak VPS cookies
+  respHeaders.delete('Set-Cookie');
 
   return new Response(resp.body, {
     status: resp.status,

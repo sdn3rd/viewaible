@@ -5,6 +5,7 @@ export default function Setup({ onSave, onCancel, initial }) {
   const [step, setStep] = useState(initial ? 'connect' : 'setup');
   const [name, setName] = useState(initial?.name || '');
   const [url, setUrl] = useState(initial?.url || '');
+  const [method, setMethod] = useState('ip');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
 
@@ -12,23 +13,20 @@ export default function Setup({ onSave, onCancel, initial }) {
     let cleanUrl = url.trim();
     if (!cleanUrl) return;
     if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-      cleanUrl = 'https://' + cleanUrl;
+      cleanUrl = 'http://' + cleanUrl;
     }
 
     setChecking(true);
     setError('');
 
     try {
-      // Store the target URL in an HttpOnly cookie via the backend
       const resp = await fetch('/api/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: cleanUrl }),
       });
 
-      if (!resp.ok) {
-        throw new Error('Failed to save connection');
-      }
+      if (!resp.ok) throw new Error('Failed to save connection');
 
       onSave({
         name: name.trim() || new URL(cleanUrl).hostname,
@@ -52,7 +50,7 @@ export default function Setup({ onSave, onCancel, initial }) {
           </p>
 
           <div className="field">
-            <label>Run on your VPS</label>
+            <label>1. Run on your VPS</label>
             <div style={{
               background: 'var(--bg)',
               border: '1px solid var(--bd)',
@@ -102,16 +100,17 @@ export default function Setup({ onSave, onCancel, initial }) {
               ))}
             </div>
             <div className="hint" style={{ marginTop: 8 }}>
-              Missing your distro? Add a YAML config — see the GitHub repo.
+              Missing your distro? Add support via the GitHub repo.
             </div>
           </div>
 
           <div className="field" style={{ marginTop: 20 }}>
-            <label>After Setup</label>
+            <label>2. Authenticate Claude Code</label>
             <div className="hint">
-              1. Point a Cloudflare DNS record at your VPS IP<br/>
-              2. Set SSL mode to "Full" in Cloudflare<br/>
-              3. Click "I've done this" below and enter your domain
+              SSH into your VPS and run:<br/>
+              <code style={{ color: 'var(--gold)', fontSize: 12 }}>
+                su - claude -c 'claude auth login'
+              </code>
             </div>
           </div>
 
@@ -136,11 +135,10 @@ export default function Setup({ onSave, onCancel, initial }) {
 
   return (
     <div className="setup-overlay">
-      <div className="setup-card">
+      <div className="setup-card" style={{ maxWidth: 520 }}>
         <h2>{initial ? 'Edit Connection' : 'Connect Terminal'}</h2>
         <p>
-          Enter the HTTPS domain pointing at your VPS.
-          The browser will prompt for ttyd credentials if set.
+          Your VPS address is proxied through pAIne and never exposed to the browser.
         </p>
 
         <div className="field">
@@ -153,22 +151,92 @@ export default function Setup({ onSave, onCancel, initial }) {
           />
         </div>
 
+        {/* Connection method selector */}
         <div className="field">
-          <label>Terminal URL</label>
-          <input
-            type="text"
-            value={url}
-            onChange={e => { setUrl(e.target.value); setError(''); }}
-            placeholder="https://terminal.example.com"
-            required
-          />
-          <div className="hint">
-            Your domain with Cloudflare proxy enabled, SSL mode "Full"
+          <label>Connection Method</label>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <button
+              type="button"
+              className={`btn btn-sm ${method === 'ip' ? 'btn-gold' : 'btn-ghost'}`}
+              onClick={() => { setMethod('ip'); setUrl(''); }}
+              style={{ flex: 1 }}
+            >
+              Direct IP (recommended)
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm ${method === 'dns' ? 'btn-gold' : 'btn-ghost'}`}
+              onClick={() => { setMethod('dns'); setUrl(''); }}
+              style={{ flex: 1 }}
+            >
+              DNS hostname
+            </button>
           </div>
         </div>
 
+        {method === 'ip' ? (
+          <div className="field">
+            <label>VPS IP + Port</label>
+            <input
+              type="text"
+              value={url}
+              onChange={e => { setUrl(e.target.value); setError(''); }}
+              placeholder="http://203.0.113.50:7681"
+              required
+            />
+            <div className="hint">
+              Enter your VPS IP with ttyd port 7681. The setup script configures
+              UFW to only allow Cloudflare and localhost — direct browser access is blocked.
+            </div>
+            <div style={{
+              marginTop: 8,
+              padding: '8px 10px',
+              background: 'var(--cd2)',
+              borderRadius: 4,
+              fontSize: 11,
+              color: 'var(--tx2)',
+              lineHeight: 1.5,
+            }}>
+              <strong style={{ color: 'var(--gold)' }}>How it works:</strong> pAIne's
+              server connects to your VPS on your behalf. Your IP address never
+              appears in the browser, page source, or network tab. The connection
+              is stored in a secure server-side cookie.
+            </div>
+          </div>
+        ) : (
+          <div className="field">
+            <label>Hostname + Port</label>
+            <input
+              type="text"
+              value={url}
+              onChange={e => { setUrl(e.target.value); setError(''); }}
+              placeholder="https://vps.example.com"
+              required
+            />
+            <div className="hint">
+              Use a DNS record pointing at your VPS. Must be <strong>DNS-only</strong> (grey
+              cloud) in Cloudflare — not proxied — to avoid routing loops.
+            </div>
+            <div style={{
+              marginTop: 8,
+              padding: '8px 10px',
+              background: 'var(--cd2)',
+              borderRadius: 4,
+              fontSize: 11,
+              color: 'var(--tx2)',
+              lineHeight: 1.5,
+            }}>
+              <strong style={{ color: 'var(--gold)' }}>DNS setup:</strong> Add an A
+              record for your subdomain pointing to your VPS IP. Set it to <strong>DNS
+              only</strong> (grey cloud icon). If you use the orange cloud (proxied),
+              the connection will loop and fail. The hostname is only used server-side
+              and never exposed to the browser.
+            </div>
+          </div>
+        )}
+
         {error && (
-          <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 12 }}>
+          <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 12, marginTop: 8 }}>
             {error}
           </div>
         )}
@@ -180,7 +248,7 @@ export default function Setup({ onSave, onCancel, initial }) {
             onClick={handleVerify}
             disabled={checking}
           >
-            {checking ? 'Checking...' : 'Connect'}
+            {checking ? 'Connecting...' : 'Connect'}
           </button>
           {!initial && (
             <button
