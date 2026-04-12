@@ -1,11 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Logo from './Logo';
+import FAQ from './FAQ';
 
-// Layout for 1-4 panes:
-// 1: [  full  ]
-// 2: [ left | right ] (if wide) or [ top / bottom ] (if tall)
-// 3: T-shape: [ left | right ] on top, [ full-width ] on bottom (or rotated if tall)
-// 4: 2x2 grid
+const MIN_PANE_PX = 200; // minimum pixels per pane before layout changes
 
 function Pane({ pane, onRemove, canRemove }) {
   return (
@@ -37,41 +34,52 @@ function Pane({ pane, onRemove, canRemove }) {
   );
 }
 
-const SPLIT_BORDER = { background: 'var(--bd)', flexShrink: 0 };
+const DIV_STYLE = { background: 'var(--bd)', flexShrink: 0 };
 
-function PaneLayout({ panes, onRemove, isWide }) {
+function PaneLayout({ panes, onRemove, dims }) {
   const canRemove = panes.length > 1;
-  const hDiv = { ...SPLIT_BORDER, width: '2px', minWidth: '2px' };
-  const vDiv = { ...SPLIT_BORDER, height: '2px', minHeight: '2px' };
+  const hDiv = { ...DIV_STYLE, width: '2px', minWidth: '2px' };
+  const vDiv = { ...DIV_STYLE, height: '2px', minHeight: '2px' };
+
+  // Decide split direction based on actual container dimensions
+  const { w, h } = dims;
+  const isWide = w >= h;
+
+  // For small screens, force stack if individual panes would be too narrow
+  const forceStack = panes.length >= 2 && (w / 2) < MIN_PANE_PX;
+  const forceColumn = panes.length >= 2 && (h / 2) < MIN_PANE_PX;
 
   if (panes.length === 1) {
     return <Pane pane={panes[0]} onRemove={onRemove} canRemove={canRemove} />;
   }
 
   if (panes.length === 2) {
-    // Split along the bigger dimension
-    if (isWide) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0 }}>
-          <Pane pane={panes[0]} onRemove={onRemove} canRemove={canRemove} />
-          <div style={hDiv} />
-          <Pane pane={panes[1]} onRemove={onRemove} canRemove={canRemove} />
-        </div>
-      );
-    }
+    const dir = forceStack ? 'column' : forceColumn ? 'row' : isWide ? 'row' : 'column';
+    const div = dir === 'row' ? hDiv : vDiv;
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+      <div style={{ display: 'flex', flexDirection: dir, flex: 1, minHeight: 0, minWidth: 0 }}>
         <Pane pane={panes[0]} onRemove={onRemove} canRemove={canRemove} />
-        <div style={vDiv} />
+        <div style={div} />
         <Pane pane={panes[1]} onRemove={onRemove} canRemove={canRemove} />
       </div>
     );
   }
 
   if (panes.length === 3) {
-    // T-shape: two on top (or left), one full-width on bottom (or right)
+    // T-shape: adapt to dimensions
+    if (forceStack) {
+      // Very narrow: stack all 3 vertically
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+          <Pane pane={panes[0]} onRemove={onRemove} canRemove={canRemove} />
+          <div style={vDiv} />
+          <Pane pane={panes[1]} onRemove={onRemove} canRemove={canRemove} />
+          <div style={vDiv} />
+          <Pane pane={panes[2]} onRemove={onRemove} canRemove={canRemove} />
+        </div>
+      );
+    }
     if (isWide) {
-      // Wide: top row split vertically, bottom row full width
       return (
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0 }}>
@@ -84,7 +92,6 @@ function PaneLayout({ panes, onRemove, isWide }) {
         </div>
       );
     }
-    // Tall: left column split horizontally, right column full height
     return (
       <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0 }}>
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
@@ -98,7 +105,19 @@ function PaneLayout({ panes, onRemove, isWide }) {
     );
   }
 
-  // 4 panes: 2x2 grid
+  // 4 panes: 2x2 grid (or 4-stack if very narrow)
+  if (forceStack) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+        {panes.map((p, i) => (
+          <div key={p.id} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            {i > 0 && <div style={vDiv} />}
+            <Pane pane={p} onRemove={onRemove} canRemove={canRemove} />
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
       <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0 }}>
@@ -119,27 +138,31 @@ function PaneLayout({ panes, onRemove, isWide }) {
 export default function Terminal({ connection, settings }) {
   const [panes, setPanes] = useState([{ id: 1 }]);
   const [showAdd, setShowAdd] = useState(false);
+  const [showFaq, setShowFaq] = useState(false);
+  const [faqHover, setFaqHover] = useState(false);
   const containerRef = useRef(null);
-  const [isWide, setIsWide] = useState(true);
+  const [dims, setDims] = useState({ w: 800, h: 600 });
 
   useEffect(() => {
     if (!containerRef.current) return;
     const ro = new ResizeObserver(entries => {
       for (const entry of entries) {
-        setIsWide(entry.contentRect.width >= entry.contentRect.height);
+        setDims({ w: entry.contentRect.width, h: entry.contentRect.height });
       }
     });
     ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, []);
 
+  const isWide = dims.w >= dims.h;
+
   if (!connection) {
     return (
-      <div className="empty">
-        <Logo size={96} />
+      <div className="empty" ref={containerRef}>
+        <Logo size={dims.w < 500 ? 64 : 96} />
         <div style={{
           fontFamily: 'var(--fd)',
-          fontSize: 28,
+          fontSize: dims.w < 500 ? 20 : 28,
           fontWeight: 500,
           color: 'var(--tx2)',
           letterSpacing: '4px',
@@ -148,16 +171,50 @@ export default function Terminal({ connection, settings }) {
           view<span style={{ color: 'var(--gold)', fontWeight: 900 }}>AI</span>ble
         </div>
         <div style={{
-          fontSize: 12,
+          fontSize: dims.w < 500 ? 10 : 12,
           color: 'var(--tx3)',
           letterSpacing: '2px',
           textTransform: 'uppercase',
         }}>
           divide and conquer, anywhere
         </div>
-        <p style={{ marginTop: 16 }}>
+        <p style={{ marginTop: 16, fontSize: dims.w < 400 ? 12 : 13 }}>
           Add a VPS to get started with Claude Code in your browser.
         </p>
+
+        {/* FAQ ? button */}
+        <div
+          onMouseEnter={() => setFaqHover(true)}
+          onMouseLeave={() => setFaqHover(false)}
+          onClick={() => setShowFaq(true)}
+          style={{
+            marginTop: 8,
+            width: faqHover ? 120 : 36,
+            height: 36,
+            borderRadius: 18,
+            background: faqHover ? 'var(--cd2)' : 'var(--cd)',
+            border: '1px solid var(--bd)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+            overflow: 'hidden',
+            fontSize: 14,
+            fontWeight: 700,
+            color: 'var(--gold)',
+          }}
+        >
+          ?
+          {faqHover && (
+            <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--tx2)', whiteSpace: 'nowrap' }}>
+              How it works
+            </span>
+          )}
+        </div>
+
+        {showFaq && <FAQ onClose={() => setShowFaq(false)} />}
       </div>
     );
   }
@@ -175,21 +232,18 @@ export default function Terminal({ connection, settings }) {
 
   const canAdd = panes.length < 4;
 
-  // + button position: on the edge where the next split would happen
+  // + button: position on the edge of the next split
   const plusStyle = (() => {
     if (panes.length === 1) {
-      // Next split: horizontal if wide, vertical if tall
       return isWide
         ? { right: 0, top: '50%', transform: 'translateY(-50%)', borderRadius: '6px 0 0 6px', width: 24, height: 44 }
         : { bottom: 0, left: '50%', transform: 'translateX(-50%)', borderRadius: '6px 6px 0 0', width: 44, height: 24 };
     }
     if (panes.length === 2) {
-      // Next split adds the T-bar
       return isWide
         ? { bottom: 0, left: '50%', transform: 'translateX(-50%)', borderRadius: '6px 6px 0 0', width: 44, height: 24 }
         : { right: 0, top: '50%', transform: 'translateY(-50%)', borderRadius: '6px 0 0 6px', width: 24, height: 44 };
     }
-    // 3 panes → 4th makes a grid, put + in center
     return { bottom: '50%', right: 0, transform: 'translateY(50%)', borderRadius: '6px 0 0 6px', width: 24, height: 44 };
   })();
 
@@ -200,10 +254,9 @@ export default function Terminal({ connection, settings }) {
         height: showAdd ? 'calc(100% - 40px)' : '100%',
         transition: 'height 0.15s ease',
       }}>
-        <PaneLayout panes={panes} onRemove={removePane} isWide={isWide} />
+        <PaneLayout panes={panes} onRemove={removePane} dims={dims} />
       </div>
 
-      {/* Add session footer */}
       {showAdd && (
         <div style={{
           height: 40,
@@ -218,20 +271,13 @@ export default function Terminal({ connection, settings }) {
           <button className="btn btn-gold btn-sm" onClick={addPane} disabled={!canAdd}>
             + New Session
           </button>
-          <span style={{ fontSize: 11, color: 'var(--tx3)' }}>
-            {panes.length}/4
-          </span>
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => setShowAdd(false)}
-            style={{ padding: '4px 10px' }}
-          >
+          <span style={{ fontSize: 11, color: 'var(--tx3)' }}>{panes.length}/4</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => setShowAdd(false)} style={{ padding: '4px 10px' }}>
             &times;
           </button>
         </div>
       )}
 
-      {/* Floating + button */}
       {!showAdd && canAdd && (
         <button
           onClick={() => setShowAdd(true)}

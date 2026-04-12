@@ -222,6 +222,36 @@ html, body, #root {
   justify-content: center;
   background: var(--bg);
   z-index: 20;
+  overflow: hidden;
+}
+
+.setup-overlay::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(40, 40, 50, 0.8) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, rgba(30, 30, 45, 0.7) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(50, 45, 55, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(35, 35, 50, 0.5) 0%, transparent 55%),
+    radial-gradient(ellipse at 30% 20%, rgba(45, 40, 50, 0.4) 0%, transparent 50%);
+  filter: blur(80px);
+  z-index: -1;
+  animation: auroraShift 20s ease-in-out infinite alternate;
+}
+
+[data-theme="light"] .setup-overlay::before {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(180, 180, 190, 0.3) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, rgba(160, 160, 175, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(170, 170, 180, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(150, 150, 165, 0.2) 0%, transparent 55%);
+}
+
+@keyframes auroraShift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3%, 2%) scale(1.05); }
+  100% { transform: translate(2%, -2%) scale(1); }
 }
 
 .setup-card {
@@ -395,7 +425,32 @@ html, body, #root {
   height: 100%;
   color: var(--tx3);
   gap: 16px;
+  position: relative;
+  overflow: hidden;
 }
+
+.empty::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(40, 40, 50, 0.8) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, rgba(30, 30, 45, 0.7) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(50, 45, 55, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(35, 35, 50, 0.5) 0%, transparent 55%);
+  filter: blur(80px);
+  z-index: 0;
+  animation: auroraShift 20s ease-in-out infinite alternate;
+}
+
+[data-theme="light"] .empty::before {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(180, 180, 190, 0.3) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, rgba(160, 160, 175, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(170, 170, 180, 0.2) 0%, transparent 50%);
+}
+
+.empty > * { position: relative; z-index: 1; }
 
 .empty svg { opacity: 0.25; }
 
