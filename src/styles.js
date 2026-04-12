@@ -225,43 +225,114 @@ html, body, #root {
   overflow: hidden;
 }
 
-.setup-overlay::before {
+/* Lava lamp blobs — blue gradients */
+.setup-overlay::before,
+.empty::before {
   content: '';
   position: absolute;
-  inset: -50%;
+  inset: -60%;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(40, 40, 50, 0.8) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 30%, rgba(30, 30, 45, 0.7) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(50, 45, 55, 0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, rgba(35, 35, 50, 0.5) 0%, transparent 55%),
-    radial-gradient(ellipse at 30% 20%, rgba(45, 40, 50, 0.4) 0%, transparent 50%);
-  filter: blur(80px);
+    radial-gradient(ellipse at 25% 45%, rgba(20, 60, 140, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 25%, rgba(40, 100, 180, 0.5) 0%, transparent 45%),
+    radial-gradient(ellipse at 55% 75%, rgba(15, 40, 100, 0.55) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 65%, rgba(60, 130, 200, 0.35) 0%, transparent 45%),
+    radial-gradient(ellipse at 15% 20%, rgba(30, 80, 160, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 90%, rgba(10, 30, 80, 0.5) 0%, transparent 55%);
+  filter: blur(90px);
   z-index: -1;
-  animation: auroraShift 20s ease-in-out infinite alternate;
+  animation: lavaLamp 25s ease-in-out infinite alternate;
 }
 
-[data-theme="light"] .setup-overlay::before {
+[data-theme="light"] .setup-overlay::before,
+[data-theme="light"] .empty::before {
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(180, 180, 190, 0.3) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 30%, rgba(160, 160, 175, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(170, 170, 180, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, rgba(150, 150, 165, 0.2) 0%, transparent 55%);
+    radial-gradient(ellipse at 25% 45%, rgba(100, 150, 220, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 25%, rgba(120, 170, 230, 0.18) 0%, transparent 45%),
+    radial-gradient(ellipse at 55% 75%, rgba(80, 130, 200, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 65%, rgba(140, 180, 240, 0.12) 0%, transparent 45%);
 }
 
-@keyframes auroraShift {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-3%, 2%) scale(1.05); }
-  100% { transform: translate(2%, -2%) scale(1); }
+/* Constellation dots overlay */
+.setup-overlay::after,
+.empty::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.15;
+  background-image:
+    radial-gradient(circle at 10% 15%, #fff 1px, transparent 1px),
+    radial-gradient(circle at 25% 60%, #fff 0.8px, transparent 0.8px),
+    radial-gradient(circle at 40% 30%, #fff 1.2px, transparent 1.2px),
+    radial-gradient(circle at 55% 80%, #fff 0.6px, transparent 0.6px),
+    radial-gradient(circle at 70% 20%, #fff 1px, transparent 1px),
+    radial-gradient(circle at 85% 55%, #fff 0.8px, transparent 0.8px),
+    radial-gradient(circle at 15% 85%, #fff 1px, transparent 1px),
+    radial-gradient(circle at 45% 50%, #fff 0.7px, transparent 0.7px),
+    radial-gradient(circle at 65% 45%, #fff 1.1px, transparent 1.1px),
+    radial-gradient(circle at 90% 80%, #fff 0.9px, transparent 0.9px),
+    radial-gradient(circle at 30% 10%, #fff 0.8px, transparent 0.8px),
+    radial-gradient(circle at 78% 90%, #fff 1px, transparent 1px),
+    radial-gradient(circle at 50% 15%, #fff 0.6px, transparent 0.6px),
+    radial-gradient(circle at 20% 40%, #fff 1px, transparent 1px),
+    radial-gradient(circle at 92% 35%, #fff 0.7px, transparent 0.7px);
+  background-size: 400px 400px;
+  animation: constellationDrift 60s linear infinite;
+}
+
+[data-theme="light"] .setup-overlay::after,
+[data-theme="light"] .empty::after {
+  opacity: 0.06;
+  background-image:
+    radial-gradient(circle at 10% 15%, #000 1px, transparent 1px),
+    radial-gradient(circle at 25% 60%, #000 0.8px, transparent 0.8px),
+    radial-gradient(circle at 40% 30%, #000 1.2px, transparent 1.2px),
+    radial-gradient(circle at 55% 80%, #000 0.6px, transparent 0.6px),
+    radial-gradient(circle at 70% 20%, #000 1px, transparent 1px),
+    radial-gradient(circle at 85% 55%, #000 0.8px, transparent 0.8px),
+    radial-gradient(circle at 15% 85%, #000 1px, transparent 1px),
+    radial-gradient(circle at 45% 50%, #000 0.7px, transparent 0.7px),
+    radial-gradient(circle at 65% 45%, #000 1.1px, transparent 1.1px),
+    radial-gradient(circle at 90% 80%, #000 0.9px, transparent 0.9px);
+  background-size: 400px 400px;
+}
+
+@keyframes lavaLamp {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(-4%, 3%) scale(1.06) rotate(1deg); }
+  66% { transform: translate(3%, -2%) scale(0.97) rotate(-1deg); }
+  100% { transform: translate(-1%, 4%) scale(1.03) rotate(0.5deg); }
+}
+
+@keyframes constellationDrift {
+  0% { background-position: 0 0; }
+  100% { background-position: 400px 400px; }
 }
 
 .setup-card {
   width: 440px;
   max-width: 90vw;
-  background: var(--cd);
-  border: 1px solid var(--bd);
-  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.03) 100%),
+    rgba(22, 22, 37, 0.72);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.15);
+  border-left-color: rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
   padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
   animation: fadeIn 0.25s ease;
+}
+
+[data-theme="light"] .setup-card {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.3) 100%),
+    rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.5);
 }
 
 .setup-card h2 {
@@ -427,27 +498,6 @@ html, body, #root {
   gap: 16px;
   position: relative;
   overflow: hidden;
-}
-
-.empty::before {
-  content: '';
-  position: absolute;
-  inset: -50%;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(40, 40, 50, 0.8) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 30%, rgba(30, 30, 45, 0.7) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(50, 45, 55, 0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, rgba(35, 35, 50, 0.5) 0%, transparent 55%);
-  filter: blur(80px);
-  z-index: 0;
-  animation: auroraShift 20s ease-in-out infinite alternate;
-}
-
-[data-theme="light"] .empty::before {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(180, 180, 190, 0.3) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 30%, rgba(160, 160, 175, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(170, 170, 180, 0.2) 0%, transparent 50%);
 }
 
 .empty > * { position: relative; z-index: 1; }
