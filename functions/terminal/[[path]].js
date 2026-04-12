@@ -43,18 +43,9 @@ export async function onRequest({ request, params }) {
     );
   }
 
-  // Reject raw IP targets early
+  // Validate target URL
   try {
-    const hostname = new URL(targetBase).hostname;
-    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
-      return errorPage(
-        'IP Address Not Supported',
-        'Cloudflare Workers cannot connect to raw IP addresses. ' +
-        'Use a DNS-only (grey cloud) hostname instead.<br><br>' +
-        'Add an A record in Cloudflare: <code>vps.yourdomain.com → your IP</code><br>' +
-        'Set it to DNS only (grey cloud), then reconnect with that hostname.'
-      );
-    }
+    new URL(targetBase);
   } catch {
     return errorPage('Invalid Target', 'The stored connection URL is malformed.');
   }

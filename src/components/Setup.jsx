@@ -4,33 +4,24 @@ import { supportedDistros } from '../distros';
 export default function Setup({ onSave, onCancel, initial }) {
   const [step, setStep] = useState(initial ? 'connect' : 'setup');
   const [name, setName] = useState(initial?.name || '');
-  const [url, setUrl] = useState(initial?.url || '');
-  const [method, setMethod] = useState('ip');
+  const [host, setHost] = useState(initial?.host || '');
+  const [port, setPort] = useState(initial?.port || '7681');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
 
-  const handleVerify = async () => {
-    let cleanUrl = url.trim();
-    if (!cleanUrl) return;
-    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-      cleanUrl = 'http://' + cleanUrl;
+  const handleConnect = async () => {
+    const h = host.trim();
+    if (!h) return;
+
+    const p = parseInt(port) || 7681;
+
+    // If raw IP, convert to sslip.io hostname (Workers can't fetch IPs directly)
+    let resolved = h;
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) {
+      resolved = `${h}.sslip.io`;
     }
 
-    // Detect raw IP addresses — Cloudflare Workers can't fetch IPs directly
-    try {
-      const hostname = new URL(cleanUrl).hostname;
-      if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
-        setError(
-          'Cloudflare Workers cannot connect to raw IP addresses. ' +
-          'Add a DNS-only (grey cloud) A record in Cloudflare pointing to your VPS IP, ' +
-          'then use that hostname instead (e.g. http://vps.example.com:7681).'
-        );
-        return;
-      }
-    } catch {
-      setError('Invalid URL format.');
-      return;
-    }
+    const url = `http://${resolved}:${p}`;
 
     setChecking(true);
     setError('');
@@ -39,17 +30,22 @@ export default function Setup({ onSave, onCancel, initial }) {
       const resp = await fetch('/api/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: cleanUrl }),
+        body: JSON.stringify({ url }),
       });
 
-      if (!resp.ok) throw new Error('Failed to save connection');
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to save connection');
+      }
 
       onSave({
-        name: name.trim() || new URL(cleanUrl).hostname,
-        url: cleanUrl,
+        name: name.trim() || h,
+        host: h,
+        port: p,
+        url,
       });
-    } catch {
-      setError('Could not set up connection. Check the URL and try again.');
+    } catch (e) {
+      setError(e.message || 'Could not set up connection.');
     } finally {
       setChecking(false);
     }
@@ -58,11 +54,10 @@ export default function Setup({ onSave, onCancel, initial }) {
   if (step === 'setup') {
     return (
       <div className="setup-overlay">
-        <div className="setup-card" style={{ maxWidth: 560 }}>
+        <div className="setup-card" style={{ maxWidth: 540 }}>
           <h2>Set Up Your VPS</h2>
           <p>
-            Run this command on your VPS to install Claude Code, ttyd, and nginx.
-            Works on any supported Linux distro — auto-detected.
+            Run this on your VPS to install Claude Code + terminal server.
           </p>
 
           <div className="field">
@@ -70,9 +65,9 @@ export default function Setup({ onSave, onCancel, initial }) {
             <div style={{
               background: 'var(--bg)',
               border: '1px solid var(--bd)',
-              borderRadius: 6,
+              borderRadius: 'var(--radius)',
               padding: '12px 14px',
-              fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+              fontFamily: 'var(--mono)',
               fontSize: 12,
               color: 'var(--gold)',
               wordBreak: 'break-all',
@@ -80,68 +75,55 @@ export default function Setup({ onSave, onCancel, initial }) {
               cursor: 'pointer',
               position: 'relative',
             }}
-              onClick={() => {
-                navigator.clipboard.writeText('curl -fsSL https://viewaible.app/setup.sh | bash');
-              }}
+              onClick={() => navigator.clipboard.writeText('curl -fsSL https://viewaible.app/setup.sh | bash')}
               title="Click to copy"
             >
               curl -fsSL https://viewaible.app/setup.sh | bash
-              <span style={{
-                position: 'absolute',
-                top: 8,
-                right: 10,
-                fontSize: 10,
-                color: 'var(--tx3)',
-              }}>click to copy</span>
+              <span style={{ position: 'absolute', top: 8, right: 10, fontSize: 10, color: 'var(--tx3)' }}>
+                click to copy
+              </span>
             </div>
           </div>
 
           <div className="field">
-            <label>Supported Distros</label>
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 6,
-              marginTop: 4,
-            }}>
+            <label>Supported</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
               {supportedDistros.map(d => (
                 <span key={d.id} style={{
                   background: 'var(--cd2)',
                   border: '1px solid var(--bd)',
                   borderRadius: 4,
-                  padding: '3px 8px',
-                  fontSize: 11,
+                  padding: '2px 7px',
+                  fontSize: 10,
                   color: 'var(--tx2)',
                 }}>{d.name}</span>
               ))}
             </div>
-            <div className="hint" style={{ marginTop: 8 }}>
-              Missing your distro? Add support via the GitHub repo.
-            </div>
           </div>
 
-          <div className="field" style={{ marginTop: 20 }}>
-            <label>2. Authenticate Claude Code</label>
+          <div className="field">
+            <label>2. Authenticate Claude</label>
             <div className="hint">
-              SSH into your VPS and run:<br/>
-              <code style={{ color: 'var(--gold)', fontSize: 12 }}>
+              SSH into your VPS and run:
+              <code style={{ color: 'var(--gold)', fontSize: 12, display: 'block', marginTop: 4 }}>
                 su - claude -c 'claude auth login'
               </code>
             </div>
           </div>
 
+          <div className="field">
+            <label>3. DNS Setup</label>
+            <div className="hint">
+              Add a <strong>DNS-only</strong> (grey cloud) A record in Cloudflare pointing to your VPS IP.
+            </div>
+          </div>
+
           <div className="setup-actions">
-            <button
-              type="button"
-              className="btn btn-gold btn-full"
-              onClick={() => setStep('connect')}
-            >
-              I've run the setup &rarr;
+            <button type="button" className="btn btn-gold btn-full" onClick={() => setStep('connect')}>
+              Done, connect &rarr;
             </button>
             {onCancel && (
-              <button type="button" className="btn btn-ghost" onClick={onCancel}>
-                Cancel
-              </button>
+              <button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button>
             )}
           </div>
         </div>
@@ -151,11 +133,9 @@ export default function Setup({ onSave, onCancel, initial }) {
 
   return (
     <div className="setup-overlay">
-      <div className="setup-card" style={{ maxWidth: 520 }}>
-        <h2>{initial ? 'Edit Connection' : 'Connect Terminal'}</h2>
-        <p>
-          Your VPS address is proxied through viewAIble and never exposed to the browser.
-        </p>
+      <div className="setup-card" style={{ maxWidth: 460 }}>
+        <h2>{initial ? 'Edit' : 'Connect'}</h2>
+        <p>Enter your VPS hostname (DNS-only, grey cloud in Cloudflare).</p>
 
         <div className="field">
           <label>Name</label>
@@ -167,46 +147,34 @@ export default function Setup({ onSave, onCancel, initial }) {
           />
         </div>
 
-        <div className="field">
-          <label>Terminal Hostname</label>
-          <input
-            type="text"
-            value={url}
-            onChange={e => { setUrl(e.target.value); setError(''); }}
-            placeholder="http://vps.example.com:7681"
-            required
-          />
-          <div className="hint">
-            A DNS hostname pointing at your VPS with ttyd port.
+        <div className="field-row">
+          <div className="field">
+            <label>Hostname</label>
+            <input
+              type="text"
+              value={host}
+              onChange={e => { setHost(e.target.value); setError(''); }}
+              placeholder="vps.example.com"
+              required
+            />
+          </div>
+          <div className="field" style={{ maxWidth: 100 }}>
+            <label>Port</label>
+            <input
+              type="number"
+              value={port}
+              onChange={e => setPort(e.target.value)}
+              placeholder="7681"
+            />
           </div>
         </div>
 
-        <div style={{
-          padding: '10px 12px',
-          background: 'var(--cd2)',
-          borderRadius: 6,
-          fontSize: 11,
-          color: 'var(--tx2)',
-          lineHeight: 1.6,
-          marginBottom: 16,
-        }}>
-          <strong style={{ color: 'var(--gold)', display: 'block', marginBottom: 4 }}>
-            Cloudflare DNS Setup
-          </strong>
-          1. Add an <strong>A record</strong> for a subdomain (e.g. <code style={{ color: 'var(--tx)' }}>vps.example.com</code>)
-             pointing to your VPS IP<br/>
-          2. Set it to <strong style={{ color: 'var(--tx)' }}>DNS only</strong> (grey
-             cloud) — <strong style={{ color: 'var(--red)' }}>not proxied</strong><br/>
-          3. Enter <code style={{ color: 'var(--tx)' }}>http://vps.example.com:7681</code> above<br/><br/>
-          <span style={{ color: 'var(--tx3)' }}>
-            Why grey cloud? viewAIble's server connects to your VPS directly.
-            If the DNS is proxied (orange cloud), the request loops through Cloudflare
-            and fails. Your hostname is stored server-side only — never visible in the browser.
-          </span>
+        <div className="hint" style={{ marginBottom: 12 }}>
+          IP address or hostname. If using Cloudflare DNS, set to DNS-only (grey cloud).
         </div>
 
         {error && (
-          <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 12, marginTop: 8 }}>
+          <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
             {error}
           </div>
         )}
@@ -215,24 +183,18 @@ export default function Setup({ onSave, onCancel, initial }) {
           <button
             type="button"
             className="btn btn-gold btn-full"
-            onClick={handleVerify}
+            onClick={handleConnect}
             disabled={checking}
           >
             {checking ? 'Connecting...' : 'Connect'}
           </button>
           {!initial && (
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => setStep('setup')}
-            >
+            <button type="button" className="btn btn-ghost" onClick={() => setStep('setup')}>
               &larr; Back
             </button>
           )}
           {onCancel && (
-            <button type="button" className="btn btn-ghost" onClick={onCancel}>
-              Cancel
-            </button>
+            <button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button>
           )}
         </div>
       </div>

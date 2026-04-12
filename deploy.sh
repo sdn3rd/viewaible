@@ -10,7 +10,7 @@ export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
 echo ""
 echo "============================================"
-echo "  pAIne Deploy"
+echo "  viewAIble Deploy"
 echo "============================================"
 echo ""
 
@@ -69,6 +69,6 @@ npx wrangler pages deploy dist \
 
 echo ""
 echo "============================================"
-echo "  Deployed pAIne v$VERSION"
+echo "  Deployed viewAIble v$VERSION"
 echo "  https://viewaible.app"
 echo "============================================"

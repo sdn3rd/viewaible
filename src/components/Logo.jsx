@@ -1,65 +1,60 @@
 export default function Logo({ size = 36 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        {/* Spiral void mask — cuts into the terminal */}
-        <mask id="spiral-void">
-          <rect width="64" height="64" fill="white"/>
-          {/* Spiral path as negative space */}
-          <path
-            d="M32 38
-               a4 4 0 0 1 4 -4
-               a7 7 0 0 1 -7 7
-               a10 10 0 0 1 10 -10
-               a13 13 0 0 1 -13 13"
-            stroke="black"
-            strokeWidth="2.5"
-            fill="none"
-            strokeLinecap="round"
-          />
-          {/* Center void dot */}
-          <circle cx="32" cy="38" r="2" fill="black"/>
-        </mask>
-      </defs>
+    <svg width={size} height={size} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Background */}
+      <rect width="512" height="512" rx="96" fill="#0B0B14"/>
 
-      {/* Terminal silhouette */}
-      <g mask="url(#spiral-void)">
-        {/* Body */}
-        <rect x="4" y="8" width="56" height="48" rx="6" fill="#1A1A2E"/>
-        {/* Title bar */}
-        <rect x="4" y="8" width="56" height="11" rx="6" fill="#222240"/>
-        <rect x="4" y="14" width="56" height="5" fill="#222240"/>
-        {/* Screen glow */}
-        <rect x="6" y="21" width="52" height="33" rx="2" fill="#0B0B14"/>
-      </g>
+      {/* Terminal body */}
+      <rect x="48" y="72" width="416" height="368" rx="32" fill="#1A1A2E"/>
 
-      {/* Title bar dots (on top of mask) */}
-      <circle cx="13" cy="14" r="2" fill="#C0392B" opacity="0.9"/>
-      <circle cx="19" cy="14" r="2" fill="#D4AF37" opacity="0.9"/>
-      <circle cx="25" cy="14" r="2" fill="#2ECC71" opacity="0.9"/>
+      {/* Title bar */}
+      <rect x="48" y="72" width="416" height="72" rx="32" fill="#222240"/>
+      <rect x="48" y="112" width="416" height="32" fill="#222240"/>
 
-      {/* Spiral outline — visible as gold trace */}
+      {/* Window dots */}
+      <circle cx="100" cy="108" r="14" fill="#C0392B"/>
+      <circle cx="148" cy="108" r="14" fill="#D4AF37"/>
+      <circle cx="196" cy="108" r="14" fill="#2ECC71"/>
+
+      {/* Screen */}
+      <rect x="64" y="156" width="384" height="268" rx="8" fill="#0B0B14"/>
+
+      {/* Golden spiral */}
       <path
-        d="M32 38
-           a4 4 0 0 1 4 -4
-           a7 7 0 0 1 -7 7
-           a10 10 0 0 1 10 -10
-           a13 13 0 0 1 -13 13"
+        d="M256 310
+           a30 30 0 0 1 30 -30
+           a55 55 0 0 1 -55 55
+           a85 85 0 0 1 85 -85
+           a120 120 0 0 1 -120 120"
         stroke="#D4AF37"
-        strokeWidth="1.5"
+        strokeWidth="6"
         fill="none"
         strokeLinecap="round"
-        opacity="0.7"
+        opacity="0.85"
       />
 
-      {/* Center void glow */}
-      <circle cx="32" cy="38" r="3" fill="#D4AF37" opacity="0.15"/>
-      <circle cx="32" cy="38" r="1.5" fill="#D4AF37" opacity="0.5"/>
+      {/* Inner spiral */}
+      <path
+        d="M256 310
+           a12 12 0 0 0 -12 12
+           a20 20 0 0 0 20 -20"
+        stroke="#D4AF37"
+        strokeWidth="4"
+        fill="none"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
 
-      {/* Subtle prompt lines */}
-      <line x1="10" y1="26" x2="16" y2="26" stroke="#D4AF37" strokeWidth="1" opacity="0.3"/>
-      <line x1="18" y1="26" x2="30" y2="26" stroke="#8888AA" strokeWidth="1" opacity="0.2"/>
-      <line x1="10" y1="30" x2="14" y2="30" stroke="#D4AF37" strokeWidth="1" opacity="0.3"/>
+      {/* Void center */}
+      <circle cx="256" cy="310" r="16" fill="#D4AF37" opacity="0.08"/>
+      <circle cx="256" cy="310" r="8" fill="#D4AF37" opacity="0.2"/>
+      <circle cx="256" cy="310" r="3" fill="#D4AF37" opacity="0.6"/>
+
+      {/* Prompt lines */}
+      <rect x="88" y="176" width="48" height="4" rx="2" fill="#D4AF37" opacity="0.35"/>
+      <rect x="144" y="176" width="96" height="4" rx="2" fill="#8888AA" opacity="0.2"/>
+      <rect x="88" y="192" width="36" height="4" rx="2" fill="#D4AF37" opacity="0.25"/>
+      <rect x="132" y="192" width="72" height="4" rx="2" fill="#8888AA" opacity="0.15"/>
     </svg>
   );
 }

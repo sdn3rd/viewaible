@@ -1,16 +1,16 @@
 import Logo from './Logo';
 
-export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemove }) {
+export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemove, onSettings }) {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <Logo size={32} />
+        <Logo size={28} />
         <h1>view<span>AI</span>ble</h1>
       </div>
 
       <div className="vps-list">
         {connections.length === 0 && (
-          <div style={{ padding: '16px 8px', color: 'var(--tx3)', fontSize: 13, textAlign: 'center' }}>
+          <div style={{ padding: '16px 8px', color: 'var(--tx3)', fontSize: 12, textAlign: 'center', lineHeight: 1.6 }}>
             No connections yet
           </div>
         )}
@@ -20,10 +20,10 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
             className={`vps-item${c.id === activeId ? ' active' : ''}`}
             onClick={() => onSelect(c.id)}
           >
-            <div className={`vps-dot connected`} />
+            <div className="vps-dot connected" />
             <div style={{ overflow: 'hidden', flex: 1 }}>
               <div className="vps-name">{c.name}</div>
-              <div className="vps-host">{c.url?.replace(/^https?:\/\//, '') || 'unknown'}</div>
+              <div className="vps-host">{c.host || 'connected'}</div>
             </div>
             <button
               className="btn btn-ghost btn-sm"
@@ -40,6 +40,9 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
       <div className="sidebar-footer">
         <button className="btn btn-gold btn-full btn-sm" onClick={onAdd}>
           + Add VPS
+        </button>
+        <button className="btn btn-ghost btn-full btn-sm" onClick={onSettings}>
+          Settings
         </button>
       </div>
     </div>
