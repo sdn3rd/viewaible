@@ -56,11 +56,26 @@ echo "[4/7] ttyd..."
 wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64
 chmod +x /usr/local/bin/ttyd
 
-# ── 5. Session user + systemd service ────────────────────────────────────
+# ── 5. Session user + service ────────────────────────────────────
 echo "[5/7] Session user + service..."
 if ! id "claude" &>/dev/null; then
     useradd -m -s /bin/bash "claude"
 fi
+
+# Generate a strong random password for ttyd auth
+TTYD_PASS=$(openssl rand -base64 24 | tr -d '/+=' | head -c 20)
+TTYD_USER="claude"
+echo ""
+echo "  ┌─────────────────────────────────────────┐"
+echo "  │  Terminal Credentials (SAVE THESE)       │"
+echo "  │                                          │"
+echo "  │  User: $TTYD_USER"
+echo "  │  Pass: $TTYD_PASS"
+echo "  │                                          │"
+echo "  │  You'll need these to connect via        │"
+echo "  │  viewAIble. The browser will prompt.     │"
+echo "  └─────────────────────────────────────────┘"
+echo ""
 
 cat > /home/claude/.bash_profile << 'BPEOF'
 export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
@@ -74,20 +89,21 @@ echo '{"hasCompletedOnboarding":true}' > /home/claude/.claude.json
 chown -R claude:claude /home/claude/.claude /home/claude/.claude.json
 
 # ttyd launches a fresh Claude session per browser connection.
-# viewAIble's UI handles multi-session via multiple iframes.
-cat > /etc/systemd/system/claude-terminal.service << 'SVEOF'
+# Auth is REQUIRED — without it anyone on Cloudflare's network could connect.
+cat > /etc/systemd/system/claude-terminal.service << SVEOF
 [Unit]
 Description=viewAIble Claude Code Terminal
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/ttyd \
-    --port 7681 \
-    --writable \
-    --terminal-type xterm-256color \
-    --client-option fontSize=13 \
-    --client-option fontFamily='JetBrains Mono,Fira Code,Consolas,monospace' \
+ExecStart=/usr/local/bin/ttyd \\
+    --port 7681 \\
+    --credential ${TTYD_USER}:${TTYD_PASS} \\
+    --writable \\
+    --terminal-type xterm-256color \\
+    --client-option fontSize=13 \\
+    --client-option fontFamily='JetBrains Mono,Fira Code,Consolas,monospace' \\
     su - claude -c 'claude; exec bash'
 Restart=on-failure
 RestartSec=3
@@ -234,10 +250,17 @@ echo "  │  Hostname:  vps.yourdomain.com           │"
 echo "  │  Port:      7681                         │"
 echo "  └─────��──────────────────────────────��────┘"
 echo ""
-echo "  Go to: https://viewaible.app"
-echo "  Click '+ Add VPS' and enter the above."
+echo "  ┌─────────────────────────────────────────┐"
+echo "  │  Terminal Auth (browser will prompt):   │"
+echo "  │                                         │"
+echo "  │  User: $TTYD_USER"
+echo "  │  Pass: $TTYD_PASS"
+echo "  └─────────────────────────────────────────┘"
 echo ""
-echo "  Claude auth happens in the terminal itself."
-echo "  Just type /login once connected."
+echo "  Go to: https://yourdomain.com"
+echo "  Click '+ Add VPS' and enter hostname + port."
+echo "  Browser will prompt for the credentials above."
+echo ""
+echo "  Claude auth: type /login in the terminal."
 echo ""
 echo "============================================"

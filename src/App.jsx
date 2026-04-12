@@ -97,16 +97,18 @@ export default function App() {
     <>
       <style>{CSS}</style>
       <div className="app">
-        <Sidebar
-          connections={connections}
-          activeId={activeId}
-          onSelect={setActiveId}
-          onAdd={() => setShowSetup(true)}
-          onRemove={handleRemove}
-          onSettings={() => setShowSettings(true)}
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(c => !c)}
-        />
+        {connections.length > 0 && (
+          <Sidebar
+            connections={connections}
+            activeId={activeId}
+            onSelect={setActiveId}
+            onAdd={() => setShowSetup(true)}
+            onRemove={handleRemove}
+            onSettings={() => setShowSettings(true)}
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(c => !c)}
+          />
+        )}
         <div className="main" style={{ paddingBottom: 28 }}>
           {active && (
             <div className="terminal-bar">

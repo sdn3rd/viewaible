@@ -56,13 +56,49 @@ html, body, #root {
 }
 
 /* ── Layout ──────────────────────────────────────────────────── */
-.app { display: flex; height: 100vh; }
+.app {
+  display: flex;
+  height: 100vh;
+  background: #050510;
+  position: relative;
+  overflow: hidden;
+}
+
+/* App-level constellation + blobs behind everything */
+.app::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(4, 4, 12, 0.95) 0%, transparent 35%),
+    radial-gradient(ellipse at 70% 70%, rgba(3, 3, 10, 0.9) 0%, transparent 40%),
+    radial-gradient(circle at 25% 60%, rgba(3, 12, 60, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 75% 35%, rgba(8, 30, 80, 0.4) 0%, transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(2, 8, 40, 0.45) 0%, transparent 40%);
+  filter: blur(60px);
+  z-index: 0;
+  animation: lavaLamp 25s ease-in-out infinite alternate;
+}
+
+.app::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cline x1='50' y1='75' x2='200' y2='150' stroke='rgba(255,255,255,0.08)' stroke-width='0.5'/%3E%3Cline x1='200' y1='150' x2='350' y2='100' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='350' y1='100' x2='450' y2='200' stroke='rgba(255,255,255,0.07)' stroke-width='0.5'/%3E%3Cline x1='200' y1='150' x2='250' y2='300' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='250' y1='300' x2='400' y2='350' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Cline x1='100' y1='400' x2='250' y2='300' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='80' y1='250' x2='250' y2='300' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='75' r='2' fill='white' opacity='0.7'/%3E%3Ccircle cx='50' cy='75' r='5' fill='white' opacity='0.1'/%3E%3Ccircle cx='200' cy='150' r='2.5' fill='white' opacity='0.8'/%3E%3Ccircle cx='200' cy='150' r='6' fill='white' opacity='0.12'/%3E%3Ccircle cx='350' cy='100' r='2' fill='white' opacity='0.6'/%3E%3Ccircle cx='350' cy='100' r='5' fill='white' opacity='0.08'/%3E%3Ccircle cx='450' cy='200' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='250' cy='300' r='2.5' fill='white' opacity='0.75'/%3E%3Ccircle cx='250' cy='300' r='6' fill='white' opacity='0.1'/%3E%3Ccircle cx='400' cy='350' r='1.8' fill='white' opacity='0.55'/%3E%3Ccircle cx='80' cy='250' r='1.5' fill='white' opacity='0.45'/%3E%3Ccircle cx='100' cy='400' r='2' fill='white' opacity='0.6'/%3E%3Ccircle cx='420' cy='50' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='150' cy='50' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='300' cy='250' r='1' fill='white' opacity='0.25'/%3E%3Ccircle cx='470' cy='130' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='30' cy='180' r='0.8' fill='white' opacity='0.2'/%3E%3Ccircle cx='450' cy='450' r='2' fill='white' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 500px 500px;
+  animation: constellationDrift 80s linear infinite;
+}
+
+.app > * { position: relative; z-index: 1; }
 
 .sidebar {
   width: 260px;
   min-width: 260px;
-  background: var(--bg2);
-  border-right: 1px solid var(--bd);
+  background: rgba(10, 10, 20, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   z-index: 10;
@@ -184,8 +220,10 @@ html, body, #root {
 
 .terminal-bar {
   height: 38px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--bd);
+  background: rgba(10, 10, 20, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -204,13 +242,43 @@ html, body, #root {
 .terminal-frame {
   flex: 1;
   position: relative;
+  background: #050510;
+  overflow: hidden;
+}
+
+/* Starfield behind terminals */
+.terminal-frame::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(8, 8, 20, 0.9) 0%, transparent 35%),
+    radial-gradient(ellipse at 70% 70%, rgba(5, 5, 15, 0.85) 0%, transparent 40%),
+    radial-gradient(circle at 25% 60%, rgba(5, 25, 120, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 75% 35%, rgba(15, 60, 150, 0.4) 0%, transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(3, 15, 70, 0.45) 0%, transparent 40%);
+  filter: blur(60px);
+  z-index: 0;
+  animation: lavaLamp 25s ease-in-out infinite alternate;
+}
+
+.terminal-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cline x1='50' y1='75' x2='200' y2='150' stroke='rgba(255,255,255,0.08)' stroke-width='0.5'/%3E%3Cline x1='200' y1='150' x2='350' y2='100' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='350' y1='100' x2='450' y2='200' stroke='rgba(255,255,255,0.07)' stroke-width='0.5'/%3E%3Cline x1='200' y1='150' x2='250' y2='300' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='250' y1='300' x2='400' y2='350' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Cline x1='100' y1='400' x2='250' y2='300' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='75' r='2' fill='white' opacity='0.7'/%3E%3Ccircle cx='50' cy='75' r='5' fill='white' opacity='0.1'/%3E%3Ccircle cx='200' cy='150' r='2.5' fill='white' opacity='0.8'/%3E%3Ccircle cx='200' cy='150' r='6' fill='white' opacity='0.12'/%3E%3Ccircle cx='350' cy='100' r='2' fill='white' opacity='0.6'/%3E%3Ccircle cx='350' cy='100' r='5' fill='white' opacity='0.08'/%3E%3Ccircle cx='450' cy='200' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='250' cy='300' r='2.5' fill='white' opacity='0.75'/%3E%3Ccircle cx='250' cy='300' r='6' fill='white' opacity='0.1'/%3E%3Ccircle cx='400' cy='350' r='1.8' fill='white' opacity='0.55'/%3E%3Ccircle cx='100' cy='400' r='2' fill='white' opacity='0.6'/%3E%3Ccircle cx='420' cy='50' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='150' cy='50' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='300' cy='250' r='1' fill='white' opacity='0.25'/%3E%3Ccircle cx='470' cy='130' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='30' cy='180' r='0.8' fill='white' opacity='0.2'/%3E%3C/svg%3E");
+  background-size: 500px 500px;
+  animation: constellationDrift 80s linear infinite;
 }
 
 .terminal-frame iframe {
   width: 100%;
   height: 100%;
   border: none;
-  background: #000;
+  background: rgba(0, 0, 0, 0.95);
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Setup wizard ────────────────────────────────────────────── */
@@ -220,25 +288,31 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: #050510;
   z-index: 20;
   overflow: hidden;
 }
 
-/* Lava lamp blobs — blue gradients */
+[data-theme="light"] .setup-overlay {
+  background: #e8eaf0;
+}
+
+/* Lava lamp blobs — matches terminal area darkness */
 .setup-overlay::before,
 .empty::before {
   content: '';
   position: absolute;
-  inset: -60%;
+  inset: -40%;
   background:
-    radial-gradient(ellipse at 25% 45%, rgba(20, 60, 140, 0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 75% 25%, rgba(40, 100, 180, 0.5) 0%, transparent 45%),
-    radial-gradient(ellipse at 55% 75%, rgba(15, 40, 100, 0.55) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 65%, rgba(60, 130, 200, 0.35) 0%, transparent 45%),
-    radial-gradient(ellipse at 15% 20%, rgba(30, 80, 160, 0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at 40% 90%, rgba(10, 30, 80, 0.5) 0%, transparent 55%);
-  filter: blur(90px);
+    /* Dark clouds */
+    radial-gradient(ellipse at 30% 30%, rgba(8, 8, 20, 0.9) 0%, transparent 35%),
+    radial-gradient(ellipse at 70% 70%, rgba(5, 5, 15, 0.85) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(10, 10, 25, 0.7) 0%, transparent 30%),
+    /* Blue blobs — dark, subtle */
+    radial-gradient(circle at 25% 60%, rgba(3, 12, 60, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 75% 35%, rgba(8, 30, 80, 0.4) 0%, transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(2, 8, 40, 0.45) 0%, transparent 40%);
+  filter: blur(60px);
   z-index: -1;
   animation: lavaLamp 25s ease-in-out infinite alternate;
 }
@@ -246,55 +320,28 @@ html, body, #root {
 [data-theme="light"] .setup-overlay::before,
 [data-theme="light"] .empty::before {
   background:
-    radial-gradient(ellipse at 25% 45%, rgba(100, 150, 220, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 75% 25%, rgba(120, 170, 230, 0.18) 0%, transparent 45%),
-    radial-gradient(ellipse at 55% 75%, rgba(80, 130, 200, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 65%, rgba(140, 180, 240, 0.12) 0%, transparent 45%);
+    radial-gradient(circle at 20% 40%, rgba(80, 130, 240, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(100, 160, 250, 0.25) 0%, transparent 35%),
+    radial-gradient(circle at 60% 80%, rgba(60, 100, 200, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 85% 60%, rgba(120, 180, 255, 0.18) 0%, transparent 35%);
 }
 
-/* Constellation dots overlay */
+/* Constellation: glowing stars + connecting lines */
 .setup-overlay::after,
 .empty::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: 0.15;
-  background-image:
-    radial-gradient(circle at 10% 15%, #fff 1px, transparent 1px),
-    radial-gradient(circle at 25% 60%, #fff 0.8px, transparent 0.8px),
-    radial-gradient(circle at 40% 30%, #fff 1.2px, transparent 1.2px),
-    radial-gradient(circle at 55% 80%, #fff 0.6px, transparent 0.6px),
-    radial-gradient(circle at 70% 20%, #fff 1px, transparent 1px),
-    radial-gradient(circle at 85% 55%, #fff 0.8px, transparent 0.8px),
-    radial-gradient(circle at 15% 85%, #fff 1px, transparent 1px),
-    radial-gradient(circle at 45% 50%, #fff 0.7px, transparent 0.7px),
-    radial-gradient(circle at 65% 45%, #fff 1.1px, transparent 1.1px),
-    radial-gradient(circle at 90% 80%, #fff 0.9px, transparent 0.9px),
-    radial-gradient(circle at 30% 10%, #fff 0.8px, transparent 0.8px),
-    radial-gradient(circle at 78% 90%, #fff 1px, transparent 1px),
-    radial-gradient(circle at 50% 15%, #fff 0.6px, transparent 0.6px),
-    radial-gradient(circle at 20% 40%, #fff 1px, transparent 1px),
-    radial-gradient(circle at 92% 35%, #fff 0.7px, transparent 0.7px);
-  background-size: 400px 400px;
-  animation: constellationDrift 60s linear infinite;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3C!-- Lines --%3E%3Cline x1='50' y1='75' x2='200' y2='150' stroke='rgba(255,255,255,0.08)' stroke-width='0.5'/%3E%3Cline x1='200' y1='150' x2='350' y2='100' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='350' y1='100' x2='450' y2='200' stroke='rgba(255,255,255,0.07)' stroke-width='0.5'/%3E%3Cline x1='200' y1='150' x2='250' y2='300' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='250' y1='300' x2='400' y2='350' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Cline x1='100' y1='400' x2='250' y2='300' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='50' y1='75' x2='80' y2='250' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Cline x1='80' y1='250' x2='250' y2='300' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Cline x1='350' y1='100' x2='420' y2='50' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='400' y1='350' x2='450' y2='450' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Cline x1='100' y1='400' x2='50' y2='450' stroke='rgba(255,255,255,0.04)' stroke-width='0.5'/%3E%3C!-- Stars (bright dots with glow) --%3E%3Ccircle cx='50' cy='75' r='2' fill='white' opacity='0.7'/%3E%3Ccircle cx='50' cy='75' r='5' fill='white' opacity='0.1'/%3E%3Ccircle cx='200' cy='150' r='2.5' fill='white' opacity='0.8'/%3E%3Ccircle cx='200' cy='150' r='6' fill='white' opacity='0.12'/%3E%3Ccircle cx='350' cy='100' r='2' fill='white' opacity='0.6'/%3E%3Ccircle cx='350' cy='100' r='5' fill='white' opacity='0.08'/%3E%3Ccircle cx='450' cy='200' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='450' cy='200' r='4' fill='white' opacity='0.08'/%3E%3Ccircle cx='250' cy='300' r='2.5' fill='white' opacity='0.75'/%3E%3Ccircle cx='250' cy='300' r='6' fill='white' opacity='0.1'/%3E%3Ccircle cx='400' cy='350' r='1.8' fill='white' opacity='0.55'/%3E%3Ccircle cx='400' cy='350' r='4' fill='white' opacity='0.08'/%3E%3Ccircle cx='80' cy='250' r='1.5' fill='white' opacity='0.45'/%3E%3Ccircle cx='80' cy='250' r='4' fill='white' opacity='0.07'/%3E%3Ccircle cx='100' cy='400' r='2' fill='white' opacity='0.6'/%3E%3Ccircle cx='100' cy='400' r='5' fill='white' opacity='0.09'/%3E%3Ccircle cx='420' cy='50' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='420' cy='50' r='4' fill='white' opacity='0.07'/%3E%3Ccircle cx='450' cy='450' r='2' fill='white' opacity='0.5'/%3E%3Ccircle cx='450' cy='450' r='5' fill='white' opacity='0.08'/%3E%3Ccircle cx='50' cy='450' r='1.5' fill='white' opacity='0.4'/%3E%3C!-- Dim scattered stars --%3E%3Ccircle cx='150' cy='50' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='300' cy='250' r='1' fill='white' opacity='0.25'/%3E%3Ccircle cx='470' cy='130' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='30' cy='180' r='0.8' fill='white' opacity='0.2'/%3E%3Ccircle cx='320' cy='430' r='1' fill='white' opacity='0.25'/%3E%3Ccircle cx='180' cy='380' r='0.8' fill='white' opacity='0.2'/%3E%3Ccircle cx='480' cy='320' r='1' fill='white' opacity='0.2'/%3E%3Ccircle cx='270' cy='30' r='0.8' fill='white' opacity='0.25'/%3E%3C/svg%3E");
+  background-size: 500px 500px;
+  animation: constellationDrift 80s linear infinite;
 }
 
 [data-theme="light"] .setup-overlay::after,
 [data-theme="light"] .empty::after {
-  opacity: 0.06;
-  background-image:
-    radial-gradient(circle at 10% 15%, #000 1px, transparent 1px),
-    radial-gradient(circle at 25% 60%, #000 0.8px, transparent 0.8px),
-    radial-gradient(circle at 40% 30%, #000 1.2px, transparent 1.2px),
-    radial-gradient(circle at 55% 80%, #000 0.6px, transparent 0.6px),
-    radial-gradient(circle at 70% 20%, #000 1px, transparent 1px),
-    radial-gradient(circle at 85% 55%, #000 0.8px, transparent 0.8px),
-    radial-gradient(circle at 15% 85%, #000 1px, transparent 1px),
-    radial-gradient(circle at 45% 50%, #000 0.7px, transparent 0.7px),
-    radial-gradient(circle at 65% 45%, #000 1.1px, transparent 1.1px),
-    radial-gradient(circle at 90% 80%, #000 0.9px, transparent 0.9px);
-  background-size: 400px 400px;
+  opacity: 0.3;
+  filter: invert(1);
 }
 
 @keyframes lavaLamp {
@@ -314,7 +361,7 @@ html, body, #root {
   max-width: 90vw;
   background:
     linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.03) 100%),
-    rgba(22, 22, 37, 0.72);
+    rgba(22, 22, 37, 0.18);
   backdrop-filter: blur(24px) saturate(1.3);
   -webkit-backdrop-filter: blur(24px) saturate(1.3);
   border: 1px solid rgba(255, 255, 255, 0.1);

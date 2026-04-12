@@ -13,8 +13,10 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
           transform: 'translateY(-50%)',
           width: 24,
           height: 60,
-          background: 'var(--bg2)',
-          border: '1px solid var(--bd)',
+          background: 'rgba(10, 10, 20, 0.7)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.06)',
           borderLeft: 'none',
           borderRadius: '0 8px 8px 0',
           cursor: 'pointer',
@@ -35,29 +37,40 @@ export default function Sidebar({ connections, activeId, onSelect, onAdd, onRemo
   }
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-header" style={{ justifyContent: 'center', position: 'relative' }}>
+    <div className="sidebar" style={{ position: 'relative' }}>
+      {/* Collapse tab — vertically centered on the right edge */}
+      <button
+        onClick={onToggle}
+        title="Hide connections"
+        style={{
+          position: 'absolute',
+          right: -24,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 24,
+          height: 60,
+          background: 'rgba(10, 10, 20, 0.7)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderLeft: 'none',
+          borderRadius: '0 8px 8px 0',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--tx3)',
+          fontSize: 14,
+          zIndex: 11,
+          transition: 'all 0.15s',
+        }}
+        onMouseEnter={e => { e.target.style.color = 'var(--gold)'; }}
+        onMouseLeave={e => { e.target.style.color = 'var(--tx3)'; }}
+      >
+        &#9664;
+      </button>
+      <div className="sidebar-header" style={{ justifyContent: 'center' }}>
         <Logo size={38} />
-        <button
-          onClick={onToggle}
-          title="Hide connections"
-          style={{
-            position: 'absolute',
-            right: 12,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'none',
-            border: 'none',
-            color: 'var(--tx3)',
-            fontSize: 14,
-            cursor: 'pointer',
-            padding: '4px',
-          }}
-          onMouseEnter={e => e.target.style.color = 'var(--tx)'}
-          onMouseLeave={e => e.target.style.color = 'var(--tx3)'}
-        >
-          &#9664;
-        </button>
       </div>
 
       <div className="vps-list">
